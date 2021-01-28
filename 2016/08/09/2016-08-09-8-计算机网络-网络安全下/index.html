@@ -6,20 +6,24 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://lk668.github.io">
-  <title>8.计算机网络-网络安全下 | LiKai的博客</title>
+  <title>8.计算机网络-网络安全(下) | LiKai的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
+  <meta name="description" content="本文简单介绍一下计算网络的网络安全，主要介绍一下Internet上使用的安全协议，包括SSL,IPSec。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="8.计算机网络-网络安全下">
+<meta property="og:title" content="8.计算机网络-网络安全(下)">
 <meta property="og:url" content="https://lk668.github.io/2016/08/09/2016-08-09-8-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8B/index.html">
 <meta property="og:site_name" content="LiKai的博客">
-<meta property="og:description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
+<meta property="og:description" content="本文简单介绍一下计算网络的网络安全，主要介绍一下Internet上使用的安全协议，包括SSL,IPSec。">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://lk668.github.io/img/compute_network/8-1.png">
+<meta property="og:image" content="https://lk668.github.io/img/compute_network/8-2.png">
+<meta property="og:image" content="https://lk668.github.io/img/compute_network/8-3.png">
 <meta property="article:published_time" content="2016-08-08T16:00:00.000Z">
-<meta property="article:modified_time" content="2021-01-28T09:23:58.740Z">
+<meta property="article:modified_time" content="2021-01-28T11:55:36.342Z">
 <meta property="article:author" content="Li Kai">
-<meta property="article:tag" content="OpenStack,Kubernetes,Docker,网络,Python,Golang">
+<meta property="article:tag" content="计算机网络">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lk668.github.io/img/compute_network/8-1.png">
   
     <link rel="alternative" href="/atom.xml" title="LiKai的博客" type="application/atom+xml">
   
@@ -158,7 +162,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      8.计算机网络-网络安全下
+      8.计算机网络-网络安全(下)
     </h1>
   
 
@@ -171,7 +175,75 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <p>本文简单介绍一下计算网络的网络安全，主要介绍一下Internet上使用的安全协议，包括SSL,IPSec。</p>
+<a id="more"></a>
+
+<h2 id="Internet上使用的安全协议"><a href="#Internet上使用的安全协议" class="headerlink" title="Internet上使用的安全协议"></a>Internet上使用的安全协议</h2><h3 id="1、安全嵌套字协议SSL"><a href="#1、安全嵌套字协议SSL" class="headerlink" title="1、安全嵌套字协议SSL"></a>1、安全嵌套字协议SSL</h3><p><img src="/img/compute_network/8-1.png"></p>
+<p>位于应用层和传输层之间</p>
+<p>作用：应用层给传输层数据之前，需要对数据进行加密。<br>对于网站登录名、密码时，需要使用SSL协议，此时由http变为https</p>
+<p>SSL实现原理：</p>
+<ul>
+<li>A访问网站，网站将自己的公钥给A</li>
+<li>A将利用对称秘钥对登录信息进行加密</li>
+<li>A利用web的公钥对对称秘钥加密，随后把数据发给服务器</li>
+<li>服务器利用私钥解密，利用解密出来的对称秘钥对数据进行解密</li>
+</ul>
+<p>Internet上常用的使用SSl协议的端口</p>
+<ul>
+<li>imaps tcp-993</li>
+<li>pop3s tcp-995</li>
+<li>smtps tcp-465</li>
+<li>https tcp-443</li>
+</ul>
+<p>SSL提供的功能</p>
+<ul>
+<li>SSL服务器鉴别：允许用户证实服务器的身份。具有SSL功能的浏览器维持一张表，上面有一些可信赖的认证中心CA和他们的公钥。</li>
+<li>加密的SSL会话：客户和服务器交互的所有数据，都在发送方加密，在接收方解密。</li>
+<li>SSL客户端鉴别 ：允许服务器正式客户身份。</li>
+</ul>
+<h3 id="2、网络层安全IPSec"><a href="#2、网络层安全IPSec" class="headerlink" title="2、网络层安全IPSec"></a>2、网络层安全IPSec</h3><p>网络层安全是底层加密。</p>
+<p>IPsec工作原理：</p>
+<ul>
+<li>服务器和客户端进行通信之前，进行协商，进行SA（安全关联）</li>
+<li>SA主要是协商是否签名、是否加密。协商好后进行传输。</li>
+<li>SA只签名不加密，使用AH协议；如果既签名又加密，使用ESP协议。</li>
+</ul>
+<p>IPsec中的主要协议</p>
+<ul>
+<li>AH（鉴别首部）：鉴别源点和检查数据的完整性，但不能保密（只签名）</li>
+<li>ESP（封装安全有效载荷）：比AH复杂，鉴别源点，检查数据的完整性和提供保密（签名+加密）</li>
+</ul>
+<h4 id="2-1、鉴别首部协议AH"><a href="#2-1、鉴别首部协议AH" class="headerlink" title="2.1、鉴别首部协议AH"></a>2.1、鉴别首部协议AH</h4><p><img src="/img/compute_network/8-2.png"></p>
+<p>数据包在传输层和网络层之间插入一个AH首部,IP数据包的协议字段设置为51</p>
+<p>协议详解：</p>
+<ul>
+<li>下一个首部：TCP字段在什么位置</li>
+<li>有效负载长度</li>
+<li>保留</li>
+<li>安全参数索引SPI：固定值</li>
+<li>序列号：数据包序号</li>
+<li>鉴别数据：鉴别数据包</li>
+</ul>
+<h4 id="2-2、封装安全有效载荷ESP协议"><a href="#2-2、封装安全有效载荷ESP协议" class="headerlink" title="2.2、封装安全有效载荷ESP协议"></a>2.2、封装安全有效载荷ESP协议</h4><p><img src="/img/compute_network/8-3.png"></p>
+<p>IP数据包的协议字段设置为50</p>
+<p>协议详解：</p>
+<ul>
+<li>ESP首部：安全参数所以SPI、序号。</li>
+<li>利用ESP鉴别进行数据的鉴定。</li>
+</ul>
+<p><strong>注：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">数字签名、对称加密、非对称加密均为应用层安全</span><br><span class="line">SSL应用层和传输层之间的安全</span><br></pre></td></tr></table></figure>
+<h3 id="3、数据链路层安全"><a href="#3、数据链路层安全" class="headerlink" title="3、数据链路层安全"></a>3、数据链路层安全</h3><ul>
+<li>数据包进入路由器时，进行加密，出路由器时，进行解密。</li>
+<li>PPP身份验证</li>
+<li>ADSL用户密码登录</li>
+<li>防火墙<ul>
+<li>网络层防火墙：看不到数据包的内容。基于数据包的源地址、目标地址、协议和端口来进行控制流量</li>
+<li>应用级防火墙：能够看到数据包中的内容。基于数据包的源地址、目标地址、协议和端口、用户名、时间段、内容进行控制流量</li>
+</ul>
+</li>
+</ul>
+
       
 
       
@@ -179,6 +251,17 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
 
       
@@ -254,7 +337,7 @@
   
   
     <a href="/2016/08/02/2016-08-02-7-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8A/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">7.计算机网络-网络安全上</div>
+      <div class="article-nav-title">7.计算机网络-网络安全(上)</div>
       <i class="icon-circle-right"></i>
     </a>
   

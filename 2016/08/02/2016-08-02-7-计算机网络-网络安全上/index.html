@@ -6,19 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://lk668.github.io">
-  <title>7.计算机网络-网络安全上 | LiKai的博客</title>
+  <title>7.计算机网络-网络安全(上) | LiKai的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
+  <meta name="description" content="本文简单介绍一下计算网络的网络安全，主要包括病毒木马、加密算法、数字签名、CA证书。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="7.计算机网络-网络安全上">
+<meta property="og:title" content="7.计算机网络-网络安全(上)">
 <meta property="og:url" content="https://lk668.github.io/2016/08/02/2016-08-02-7-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8A/index.html">
 <meta property="og:site_name" content="LiKai的博客">
-<meta property="og:description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
+<meta property="og:description" content="本文简单介绍一下计算网络的网络安全，主要包括病毒木马、加密算法、数字签名、CA证书。">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2016-08-01T16:00:00.000Z">
-<meta property="article:modified_time" content="2021-01-28T09:23:09.008Z">
+<meta property="article:modified_time" content="2021-01-28T11:46:22.774Z">
 <meta property="article:author" content="Li Kai">
-<meta property="article:tag" content="OpenStack,Kubernetes,Docker,网络,Python,Golang">
+<meta property="article:tag" content="计算机网络">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="LiKai的博客" type="application/atom+xml">
@@ -158,7 +158,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      7.计算机网络-网络安全上
+      7.计算机网络-网络安全(上)
     </h1>
   
 
@@ -171,7 +171,59 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <p>本文简单介绍一下计算网络的网络安全，主要包括病毒木马、加密算法、数字签名、CA证书。</p>
+<a id="more"></a>
+
+<h2 id="1、网络安全介绍"><a href="#1、网络安全介绍" class="headerlink" title="1、网络安全介绍"></a>1、网络安全介绍</h2><p>计算机网络面临的威胁：</p>
+<ul>
+<li>截获：被动攻击，从网络中窃听他人通信的内容</li>
+<li>中断：主动攻击，有意中断他人在网络上的通信（arp欺骗）</li>
+<li>篡改：主动攻击，故意篡改传输报文（将访问的网站结果重定向）</li>
+<li>伪造：主动攻击，伪造信息在网络上传输（选用多个服务器利用大包ping攻击的服务器。这样别人就没有带宽对目标服务器进行访问，这就是DDos攻击）</li>
+</ul>
+<p>cain软件，实现用户密码的截获，以及篡改。实现的原理是使用ARP欺骗，在解析网关时，都解析成cain所在的服务器地址，所以，所有的报文后期都传输给cain所在的服务器。</p>
+<h2 id="2、病毒和木马"><a href="#2、病毒和木马" class="headerlink" title="2、病毒和木马"></a>2、病毒和木马</h2><p>恶意程序：</p>
+<ul>
+<li>计算机病毒：附加在普通软件中，安装时，一并安装到本地。</li>
+<li>计算机蠕虫：消耗计算机资源，CPU，内存</li>
+<li>特洛伊木马：特点：需要与外界通信。举例：盗号木马、远程控制木马。排查： netstat -n查看可以会话</li>
+<li>逻辑炸弹：满足特定条件触发</li>
+</ul>
+<h2 id="3、网络安全的两种加密技术"><a href="#3、网络安全的两种加密技术" class="headerlink" title="3、网络安全的两种加密技术"></a>3、网络安全的两种加密技术</h2><h3 id="3-1、对称加密"><a href="#3-1、对称加密" class="headerlink" title="3.1、对称加密"></a>3.1、对称加密</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">加密和解密的秘钥相同</span><br><span class="line">加密算法：数据机密标准DES</span><br><span class="line">加密秘钥：56位和128位，后者更普遍</span><br><span class="line">加密算法的安全性不在加密算法，而在于秘钥，只有有了秘钥，才能解密数据。</span><br></pre></td></tr></table></figure>
+<p>优缺点：</p>
+<ul>
+<li>优点：加密效率高，</li>
+<li>缺点：秘钥不适合在网上传输，不安全</li>
+<li>缺点：秘钥维护不方便，如果某台服务器与其他多台服务器进行数据加密，需要维护多个秘钥</li>
+</ul>
+<h3 id="3-2、非对称加密"><a href="#3-2、非对称加密" class="headerlink" title="3.2、非对称加密"></a>3.2、非对称加密</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">加密和解密秘钥不用，分为公钥和私钥</span><br><span class="line">公钥加密私钥解密</span><br><span class="line">私钥加密和公钥解密</span><br><span class="line">根据公钥推到不出私钥，根据私钥推到不出公钥</span><br></pre></td></tr></table></figure>
+<p>优缺点：</p>
+<ul>
+<li>缺点：加密效率低</li>
+<li>优点：维护简单，每台电脑只需要维护一个秘钥对。</li>
+</ul>
+<p>与对称加密的结合使用：</p>
+<p>数据使用对称加密。将对称加密的秘钥进行非对称加密<br>解密的时候，需要用私钥对对称秘钥进行解密，解出的秘钥进行对称解密。</p>
+<h2 id="4、数字签名"><a href="#4、数字签名" class="headerlink" title="4、数字签名"></a>4、数字签名</h2><p>作用：防止抵赖，能够检查签名后内容是否被更改</p>
+<p>实现：</p>
+<ul>
+<li>A有公钥和私钥，对合同使用单向散列函数进行处理，得到一个128位的摘要，可以理解为文件的指纹。</li>
+<li>A利用私钥对摘要进行加密，得到A的签名，A将A的公钥、签名、文件一起传给B</li>
+<li>B利用单向三列函数对合同进行处理，得到128位摘要，利用公钥把签名进行解密，看两个摘要是否相同。</li>
+</ul>
+<p>应用场景：</p>
+<ul>
+<li>公司老板下发放假通知，</li>
+<li>政府下发各种指示</li>
+<li>文件不害怕被别人看，只需要保证不被别人篡改。</li>
+</ul>
+<h2 id="5、证书颁发机构CA"><a href="#5、证书颁发机构CA" class="headerlink" title="5、证书颁发机构CA"></a>5、证书颁发机构CA</h2><p>CA的作用：</p>
+<ul>
+<li>为企业和用户颁发数字证书，确认这些企业和个人的身份，为请求者的公钥和私钥添加CA签名。接收端收到以后，先拿CA的公钥验证发送端得公钥是否合法，合法以后，进行数据的接收</li>
+<li>发布证书吊销列表</li>
+<li>企业信任颁发机构</li>
+</ul>
+
       
 
       
@@ -179,6 +231,17 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
 
       
@@ -247,7 +310,7 @@
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          8.计算机网络-网络安全下
+          8.计算机网络-网络安全(下)
         
       </div>
     </a>

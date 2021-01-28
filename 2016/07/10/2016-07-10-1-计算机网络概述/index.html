@@ -6,17 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://lk668.github.io">
-  <title>LiKai的博客</title>
+  <title>1.计算机网络概述 | LiKai的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
-<meta property="og:type" content="website">
-<meta property="og:title" content="LiKai的博客">
-<meta property="og:url" content="https://lk668.github.io/index.html">
+  <meta name="description" content="本文来简单介绍一下计算机网络的一些基本概念">
+<meta property="og:type" content="article">
+<meta property="og:title" content="1.计算机网络概述">
+<meta property="og:url" content="https://lk668.github.io/2016/07/10/2016-07-10-1-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A6%82%E8%BF%B0/index.html">
 <meta property="og:site_name" content="LiKai的博客">
-<meta property="og:description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
+<meta property="og:description" content="本文来简单介绍一下计算机网络的一些基本概念">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-07-09T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-01-28T09:38:25.047Z">
 <meta property="article:author" content="Li Kai">
-<meta property="article:tag" content="OpenStack,Kubernetes,Docker,网络,Python,Golang">
+<meta property="article:tag" content="计算机网络">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="LiKai的博客" type="application/atom+xml">
@@ -149,425 +151,92 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-    <article id="post-2017-05-10-Python编程规范" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+            <article id="post-2016-07-10-1-计算机网络概述" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/05/10/2017-05-10-Python%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/">Python编程规范</a>
+    <h1 class="article-title" itemprop="name">
+      1.计算机网络概述
     </h1>
   
 
         
-        <a href="/2017/05/10/2017-05-10-Python%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/" class="archive-article-date">
-  	<time datetime="2017-05-09T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-05-10</time>
+        <a href="/2016/07/10/2016-07-10-1-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A6%82%E8%BF%B0/" class="archive-article-date">
+  	<time datetime="2016-07-09T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-10</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>本文简单介绍一下Python写代码过程中的简单规范。当然，我们可以在写完代码后，使用<code>pep8</code>或者<code>flake8</code>工具来进行代码规范的检查</p>
-        
-          <a class="article-more-a" href="/2017/05/10/2017-05-10-Python%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/#more">more >></a>
-        
-      
+        <p>本文来简单介绍一下计算机网络的一些基本概念</p>
+<a id="more"></a>
 
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Python</a>
-        		</li>
-      		
-		</ul>
-	</div>
+<h2 id="1、局域网"><a href="#1、局域网" class="headerlink" title="1、局域网"></a>1、局域网</h2><p>局域网的网线不超过100米，百兆交换机意味着每个端口都是百兆。接入层的端口一定要多，汇聚层端口的带宽一定要大。(接入层的多个交换机以行星的模式接入汇聚层交换机)</p>
+<ul>
+<li>局域网：覆盖范围小，自己花钱购买设备，带宽固定，自己单位维护（网线最长100米，带宽 10M 100M 1000M）</li>
+<li>广域网：（ADSL拨号上网就是广域网，网线超过100米）距离比较远，超过100米，花钱买服务（租带宽），其他人服务</li>
+<li>Internet：由运营商组成，自己的机房，对网民提供访问Internet的连接。跨运营商访问速度比较慢。（因为运营商之间是由一根网线连接的）解决方案是在网通和电信分别配置服务器，下载的时候选择运营商进行下载</li>
+</ul>
+<h2 id="2、MAC、IP、网关"><a href="#2、MAC、IP、网关" class="headerlink" title="2、MAC、IP、网关"></a>2、MAC、IP、网关</h2><p>网关就是，要想和其他网段通信，需要将数据发送给谁，一般路由器的端口地址就是网关地址，14.0.0.1,默认为IP的第一个地址。</p>
+<p>计算机网卡有MAC地址，计算机有IP地址</p>
+<h2 id="3、数据包和帧"><a href="#3、数据包和帧" class="headerlink" title="3、数据包和帧"></a>3、数据包和帧</h2><ul>
+<li>数据+源、目的IP地址 = 数据包（最大1500字节）</li>
+<li>数据+源、目的IP+源、目的MAC地址 = 帧</li>
+<li>跨路由器交互时需要重写源、目的MAC地址</li>
+<li>MAC地址决定了下一跳给谁，IP地址决定了数据包最终给谁<h2 id="4、访问网站的数据传输"><a href="#4、访问网站的数据传输" class="headerlink" title="4、访问网站的数据传输"></a>4、访问网站的数据传输</h2>服务器接收到请求，返回数据，将网页信息切割成多个数据包（因为每个数据包最大1500字节），将数据包依次加入缓存（服务器端），依次发送，（对于已经发送的数据，依然在缓存中存在，因为可能发送失败，需要重发），客户端收到后，将数据存在缓存中，给服务器端发送确认信息，要求服务器发送下一个数据包。客户端浏览器从缓存中读取数据包。</li>
+</ul>
+<h2 id="5、OSI参考模型"><a href="#5、OSI参考模型" class="headerlink" title="5、OSI参考模型"></a>5、OSI参考模型</h2><h3 id="5-1、分层结构"><a href="#5-1、分层结构" class="headerlink" title="5-1、分层结构"></a>5-1、分层结构</h3><p>分层好处：每一层相互独立，相互之间不会影响（举例ip4,ipv6只是改变了网络层，其他层均没变化）层与层之间的关系：下面的层为上层提供服务，最上的应用层为人服务。</p>
+<ul>
+<li>应用层：所有能够产生网络流量的程序，可以和用户交互的程序</li>
+<li>表示层：传输之前，对数据进行加密或者压缩处理（QQ视频对图片进行压缩、加密）（主要面向开发人员）（编码）</li>
+<li>会话层：访问网络，打开不同窗口，显示相应的内容，就是会话层实现的，同时流媒体的快进和快退也是会话层实现的（windows netstat –n查看会话列表），会话的作用是可以查看木马（远程控制木马、QQ盗号木马，其不同于病毒，病毒是用于篡改你的文件的），netstat –n就可以看出木马</li>
+<li>传输层：实现可靠传输（TCP）、流量控制（接收方处理不过来，通知服务方，减缓发送速率）、不可靠传输（DNS解析、QQ聊天，一个数据包就能解决问题的时候用不可靠传输）</li>
+<li>网络层：负责选择最佳路径，规划IP地址</li>
+<li>数据链路层：定义帧的开始和结束 （定义开始和结束），透明传输（帧的开头和结尾由特殊的01字符进行标识，如果数据中，有的数据和结束位相同，发送数据的时候，要在数据（与帧结尾的标识相同的字段）前面添加标识符，交换机接收到数据时，对数据进行解析，删除标识符），差错校验</li>
+<li>物理层：定义网络设备的接口标准（网卡8根线），电器标准（数据的0,1由电压表示），如何在物理链路上传输更快的速度<h3 id="5-2、OSI参考模型网络排错"><a href="#5-2、OSI参考模型网络排错" class="headerlink" title="5-2、OSI参考模型网络排错"></a>5-2、OSI参考模型网络排错</h3></li>
+</ul>
+<p>每一层都要为上一层服务，所以网络出现问题时，要自下往上进行排错。网线有8根线，两根负责发送，两根负责接收</p>
+<ul>
+<li><p>物理故障查看网络连接状态 发送接收的数据包</p>
+</li>
+<li><p>数据链路层故障 MAC地址冲突（连接同一交换机的时候）（可以自己注册MAC地址）ADSL拨号欠费，数据链路层故障。网速无法协商一致（网卡网速和交换机端口网速协商）。计算机连接到错误的VLAN</p>
+</li>
+<li><p>网络层（规划地址，选择链路）故障。配置错误的IP地址 子网掩码。没有配置网关，或者配置了错误的网关，无法访问外网，也就无法实现选路。路由器没有配置到达目标网络的路由。</p>
+</li>
+<li><p>应用层故障（网络层以上统称为应用层故障）。</p>
+<h3 id="5-3、OSI参考模型网络安全"><a href="#5-3、OSI参考模型网络安全" class="headerlink" title="5-3、OSI参考模型网络安全"></a>5-3、OSI参考模型网络安全</h3></li>
+<li><p>物理层安全：不要让别人随便接入自己的交换机，将交换机上多余的网线拔掉或者用命令关闭某个交换机端口</p>
+</li>
+<li><p>数据链路层安全：ADSL账号密码。划分VLAN。交换机端口绑定MAC地址。</p>
+</li>
+<li><p>网络层安全：路由器基于IP地址实现流量控制（使用ACL控制数据包流量）</p>
+</li>
+<li><p>应用层安全（网络层以上）：开发的应用程序没有漏洞</p>
+<h2 id="6、计算机性能指标"><a href="#6、计算机性能指标" class="headerlink" title="6、计算机性能指标"></a>6、计算机性能指标</h2></li>
+<li><p>速率：一对连接双方在物理层传输速度</p>
+</li>
+<li><p>带宽：数字信道传输的最大速率</p>
+</li>
+<li><p>吞吐量：单位时间通过网络的数据量（速率5M，速率10M，带宽100M，吞吐量15M）</p>
+</li>
+<li><p>时延：（包括发送、传播、处理、排队时延）</p>
+<ul>
+<li>发送时延：数据包从网卡发出的时延</li>
+<li>传播时延：链路中传输的时延</li>
+<li>  处理时延：路由器寻址时延</li>
+<li>排队时延：路由器交换机数据包排队时延</li>
+<li>时延带宽积 = 时延X带宽（链路上bit数量）</li>
+</ul>
+</li>
+<li><p>往返时间RTT（ping）</p>
+</li>
+<li><p>利用率：D = D0/(1-U)其中D0指空闲时的时延，D是指网络当前时延，U就是信道利用率。<br>U = 1-D0/D</p>
+</li>
+</ul>
 
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/05/10/2017-05-10-Python%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2017-04-20-SQL基础教程-四" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/04/20/2017-04-20-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E5%9B%9B/">SQL基础教程(四)</a>
-    </h1>
-  
-
-        
-        <a href="/2017/04/20/2017-04-20-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E5%9B%9B/" class="archive-article-date">
-  	<time datetime="2017-04-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-04-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文简单介绍一下SQL的常用函数</p>
-        
-          <a class="article-more-a" href="/2017/04/20/2017-04-20-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E5%9B%9B/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">数据库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">SQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/04/20/2017-04-20-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E5%9B%9B/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2017-04-12-SQL基础教程-三" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/04/12/2017-04-12-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%89/">SQL基础教程(三)</a>
-    </h1>
-  
-
-        
-        <a href="/2017/04/12/2017-04-12-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%89/" class="archive-article-date">
-  	<time datetime="2017-04-11T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-04-12</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文简单介绍一下SQL的索引、ALTER、INCREMENT、NULLS、isnull()</p>
-        
-          <a class="article-more-a" href="/2017/04/12/2017-04-12-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%89/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">数据库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">SQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/04/12/2017-04-12-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%89/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2017-03-25-SQL基础教程-二" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/25/2017-03-25-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%BA%8C/">SQL基础教程(二)</a>
-    </h1>
-  
-
-        
-        <a href="/2017/03/25/2017-03-25-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%BA%8C/" class="archive-article-date">
-  	<time datetime="2017-03-24T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-03-25</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文简单介绍一下SQL数据表的约束规则</p>
-        
-          <a class="article-more-a" href="/2017/03/25/2017-03-25-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%BA%8C/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">数据库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">SQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/03/25/2017-03-25-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%BA%8C/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2017-03-20-SQL基础教程-一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/20/2017-03-20-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%80/">SQL基础教程(一)</a>
-    </h1>
-  
-
-        
-        <a href="/2017/03/20/2017-03-20-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%80/" class="archive-article-date">
-  	<time datetime="2017-03-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-03-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文简单介绍一下SQL的基本命令使用</p>
-        
-          <a class="article-more-a" href="/2017/03/20/2017-03-20-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%80/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">数据库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">SQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/03/20/2017-03-20-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%80/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2016-08-20-9-计算机网络-QOS" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/08/20/2016-08-20-9-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-QOS/">9.计算机网络-QOS</a>
-    </h1>
-  
-
-        
-        <a href="/2016/08/20/2016-08-20-9-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-QOS/" class="archive-article-date">
-  	<time datetime="2016-08-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-08-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
       
 
       
@@ -589,16 +258,84 @@
       
 
       
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2016/08/20/2016-08-20-9-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-QOS/">展开全文 >></a>
-        </p>
-      
 
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://lk668.github.io/2016/07/10/2016-07-10-1-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A6%82%E8%BF%B0/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
       
       <div class="clearfix"></div>
     </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2016/07/15/2016-07-15-2-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%89%A9%E7%90%86%E5%B1%82/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          2.计算机网络-物理层
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/04/10/2016-04-10-Hash%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0%E4%B9%8BMD5/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Hash算法实现之MD5</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -618,136 +355,24 @@
 
 
 
-
-  
-    <article id="post-2016-08-09-8-计算机网络-网络安全下" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/08/09/2016-08-09-8-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8B/">8.计算机网络-网络安全下</a>
-    </h1>
-  
-
-        
-        <a href="/2016/08/09/2016-08-09-8-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8B/" class="archive-article-date">
-  	<time datetime="2016-08-08T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-08-09</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2016/08/09/2016-08-09-8-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8B/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2016-08-02-7-计算机网络-网络安全上" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/08/02/2016-08-02-7-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8A/">7.计算机网络-网络安全上</a>
-    </h1>
-  
-
-        
-        <a href="/2016/08/02/2016-08-02-7-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8A/" class="archive-article-date">
-  	<time datetime="2016-08-01T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-08-02</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2016/08/02/2016-08-02-7-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8A/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
   
   
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
-    </nav>
+  
+
+  
+  <div id="SOHUCS" sid="2016-07-10-1-计算机网络概述" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyvhnMVTX",
+        conf: "prod_5c45c4e333857ed581cff78d5c199d4f"
+    });
+</script>
+</script>
+  
+
+  
+
   
 
 
@@ -770,8 +395,8 @@
     <script>
 	var yiliaConfig = {
 		mathjax: false,
-		isHome: true,
-		isPost: false,
+		isHome: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,

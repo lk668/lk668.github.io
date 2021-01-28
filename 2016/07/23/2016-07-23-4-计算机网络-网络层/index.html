@@ -20,7 +20,7 @@
 <meta property="og:image" content="https://lk668.github.io/img/compute_network/4-3.png">
 <meta property="og:image" content="https://lk668.github.io/img/compute_network/4-4.png">
 <meta property="article:published_time" content="2016-07-22T16:00:00.000Z">
-<meta property="article:modified_time" content="2021-01-28T10:11:44.329Z">
+<meta property="article:modified_time" content="2021-01-28T12:09:48.004Z">
 <meta property="article:author" content="Li Kai">
 <meta property="article:tag" content="计算机网络">
 <meta name="twitter:card" content="summary">
@@ -221,7 +221,11 @@
 <li>片偏移：13位</li>
 </ul>
 <p><img src="/img/compute_network/4-3.png"></p>
-<p>生存时间：1个字节，TTL，没过一个路由器，MAC地址要修改，TTL要减1<br>协议：数据是什么协议ICMP（1）、IGMP（2）、TCP（6）、UDP（17）、IPv6（41）、OSPF（89）<br>首部检验和：检验首部是否有错，数据包检验过程如下：</p>
+<ul>
+<li>生存时间：1个字节，TTL，每过一个路由器，MAC地址要修改，TTL要减1</li>
+<li>协议：数据是什么协议ICMP（1）、IGMP（2）、TCP（6）、UDP（17）、IPv6（41）、OSPF（89）</li>
+<li>首部检验和：检验首部是否有错，数据包检验过程如下：</li>
+</ul>
 <p><img src="/img/compute_network/4-4.png"></p>
 
       

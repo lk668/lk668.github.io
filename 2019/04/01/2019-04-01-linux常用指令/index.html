@@ -6,17 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://lk668.github.io">
-  <title>Archives | LiKai的博客</title>
+  <title>linux常用指令 | LiKai的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
-<meta property="og:type" content="website">
-<meta property="og:title" content="LiKai的博客">
-<meta property="og:url" content="https://lk668.github.io/archives/page/4/index.html">
+  <meta name="description" content="本文主要介绍一下linux常用指令。报错查看端口占用，tcp连接状态，僵尸进程，服务器信息，strace命令，查看disk i&#x2F;o。还有部分命令备份在lk668 github">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux常用指令">
+<meta property="og:url" content="https://lk668.github.io/2019/04/01/2019-04-01-linux%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4/index.html">
 <meta property="og:site_name" content="LiKai的博客">
-<meta property="og:description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
+<meta property="og:description" content="本文主要介绍一下linux常用指令。报错查看端口占用，tcp连接状态，僵尸进程，服务器信息，strace命令，查看disk i&#x2F;o。还有部分命令备份在lk668 github">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-03-31T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-01-29T03:04:19.821Z">
 <meta property="article:author" content="Li Kai">
-<meta property="article:tag" content="OpenStack,Kubernetes,Docker,网络,Python,Golang">
+<meta property="article:tag" content="linux">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="LiKai的博客" type="application/atom+xml">
@@ -149,329 +151,179 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-2019-04-01-linux常用指令" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      linux常用指令
+    </h1>
+  
+
+        
+        <a href="/2019/04/01/2019-04-01-linux%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4/" class="archive-article-date">
+  	<time datetime="2019-03-31T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-01</time>
+</a>
+        
+      </header>
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本文主要介绍一下linux常用指令。报错查看端口占用，tcp连接状态，僵尸进程，服务器信息，strace命令，查看disk i/o。还有部分命令备份在<a target="_blank" rel="noopener" href="https://github.com/lk668/accumulation/tree/master/linux">lk668 github</a></p>
+<a id="more"></a>
+
+<h2 id="1-netstat查看端口占用"><a href="#1-netstat查看端口占用" class="headerlink" title="1. netstat查看端口占用"></a>1. netstat查看端口占用</h2><p>netstat<br>netstat -tunlp 用于显示 tcp，udp 的端口和进程等相关情况。<br>netstat 查看端口占用语法格式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">netstat -tunlp | grep 端口号</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>-t (tcp) 仅显示tcp相关选项<br>-u (udp)仅显示udp相关选项<br>-n 拒绝显示别名，能显示数字的全部转化为数字<br>-l 仅列出在Listen(监听)的服务状态<br>-p 显示建立相关链接的程序名</p>
+</blockquote>
+<h2 id="2-查看僵尸进程"><a href="#2-查看僵尸进程" class="headerlink" title="2. 查看僵尸进程"></a>2. 查看僵尸进程</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">ps -A -ostat,ppid,pid,cmd | grep -e <span class="string">&#x27;^[Zz]</span></span><br><span class="line"><span class="string">ps -ef | grep defunct | grep -v grep</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">直接杀死进程</span></span><br><span class="line"><span class="string"> ps -ef | grep defunct | grep -v grep | awk &#x27;</span>&#123;<span class="built_in">print</span> <span class="string">&quot;kill -18 &quot;</span> <span class="variable">$3</span>&#125;<span class="string">&#x27;</span></span><br></pre></td></tr></table></figure>
+<h2 id="3-查看服务器信息"><a href="#3-查看服务器信息" class="headerlink" title="3. 查看服务器信息"></a>3. 查看服务器信息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 查看cpu类型</span></span><br><span class="line">lscpu</span><br><span class="line"><span class="comment"># 2. 查看磁盘类型。返回结果是0（磁盘不可旋转）标识SSD，返回结果是1（磁盘可旋转）标识HDD</span></span><br><span class="line">lsblk -d -o name,rota</span><br><span class="line"><span class="comment"># 3. 查看网卡速率</span></span><br><span class="line">ethtool &lt;网卡名字&gt;</span><br><span class="line"><span class="comment"># 4. 查看内存</span></span><br><span class="line">free -h</span><br></pre></td></tr></table></figure>
+<h2 id="4-查看cpu使用情况"><a href="#4-查看cpu使用情况" class="headerlink" title="4. 查看cpu使用情况"></a>4. 查看cpu使用情况</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">top #查看总的使用量</span><br><span class="line"></span><br><span class="line">yum install sysstat</span><br><span class="line">mpstat -P ALL #查看每个core的使用量</span><br></pre></td></tr></table></figure>
+<h2 id="5-查看进程状态"><a href="#5-查看进程状态" class="headerlink" title="5. 查看进程状态"></a>5. 查看进程状态</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">查看详细的tcp连接状态</span><br><span class="line">ss dport &#x3D;&#x3D; 6641</span><br><span class="line"></span><br><span class="line">netstat -tunalp</span><br></pre></td></tr></table></figure>
+<h2 id="6-rpmbuild-rpm包"><a href="#6-rpmbuild-rpm包" class="headerlink" title="6. rpmbuild rpm包"></a>6. rpmbuild rpm包</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#!&#x2F;bin&#x2F;bash</span><br><span class="line">git clone ovsdbapp</span><br><span class="line">git clone rpmbuild</span><br><span class="line"></span><br><span class="line">cd ovsdbapp &amp;&amp; python setup.py sdist --dist-dir &#x2F;root&#x2F;rpmbuild&#x2F;ovsdbapp&#x2F;SOURCES</span><br><span class="line"></span><br><span class="line">sudo yum clean all</span><br><span class="line">sudo yum-builddep  openstack-ovsdbapp.spec -y</span><br><span class="line">rpmbuild  -ba openstack-ovsdbapp.spec --nodeps</span><br></pre></td></tr></table></figure>
+<h2 id="7-strace命令"><a href="#7-strace命令" class="headerlink" title="7. strace命令"></a>7. strace命令</h2><p>strace常用来跟踪进程执行时的系统调用和所接收的信号。 在Linux世界，进程不能直接访问硬件设备，当进程需要访问硬件设备(比如读取磁盘文件，接收网络数据等等)时，必须由用户态模式切换至内核态模式，通 过系统调用访问硬件设备。strace可以跟踪到一个进程产生的系统调用,包括参数，返回值，执行消耗的时间。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">-c 统计每一系统调用的所执行的时间,次数和出错的次数等. </span><br><span class="line">-d 输出strace关于标准错误的调试信息. </span><br><span class="line">-f 跟踪由fork调用所产生的子进程. </span><br><span class="line">-ff 如果提供-o filename,则所有进程的跟踪结果输出到相应的filename.pid中,pid是各进程的进程号. </span><br><span class="line">-F 尝试跟踪vfork调用.在-f时,vfork不被跟踪. </span><br><span class="line">-h 输出简要的帮助信息. </span><br><span class="line">-i 输出系统调用的入口指针. </span><br><span class="line">-q 禁止输出关于脱离的消息. </span><br><span class="line">-r 打印出相对时间关于,,每一个系统调用. </span><br><span class="line">-t 在输出中的每一行前加上时间信息. </span><br><span class="line">-tt 在输出中的每一行前加上时间信息,微秒级. </span><br><span class="line">-ttt 微秒级输出,以秒了表示时间. </span><br><span class="line">-T 显示每一调用所耗的时间. </span><br><span class="line">-v 输出所有的系统调用.一些调用关于环境变量,状态,输入输出等调用由于使用频繁,默认不输出. </span><br><span class="line">-V 输出strace的版本信息. </span><br><span class="line">-x 以十六进制形式输出非标准字符串 </span><br><span class="line">-xx 所有字符串以十六进制形式输出. </span><br><span class="line">-a column </span><br><span class="line">设置返回值的输出位置.默认 为40. </span><br><span class="line">-e expr </span><br><span class="line">指定一个表达式,用来控制如何跟踪.格式如下: </span><br><span class="line">[qualifier&#x3D;][!]value1[,value2]... </span><br><span class="line">qualifier只能是 trace,abbrev,verbose,raw,signal,read,write其中之一.value是用来限定的符号或数字.默认的 qualifier是 trace.感叹号是否定符号.例如: </span><br><span class="line">-eopen等价于 -e trace&#x3D;open,表示只跟踪open调用.而-etrace!&#x3D;open表示跟踪除了open以外的其他调用.有两个特殊的符号 all 和 none. </span><br><span class="line">注意有些shell使用!来执行历史记录里的命令,所以要使用\\. </span><br><span class="line">-e trace&#x3D;set </span><br><span class="line">只跟踪指定的系统 调用.例如:-e trace&#x3D;open,close,rean,write表示只跟踪这四个系统调用.默认的为set&#x3D;all. </span><br><span class="line">-e trace&#x3D;file </span><br><span class="line">只跟踪有关文件操作的系统调用. </span><br><span class="line">-e trace&#x3D;process </span><br><span class="line">只跟踪有关进程控制的系统调用. </span><br><span class="line">-e trace&#x3D;network </span><br><span class="line">跟踪与网络有关的所有系统调用. </span><br><span class="line">-e strace&#x3D;signal </span><br><span class="line">跟踪所有与系统信号有关的 系统调用 </span><br><span class="line">-e trace&#x3D;ipc </span><br><span class="line">跟踪所有与进程通讯有关的系统调用 </span><br><span class="line">-e abbrev&#x3D;set </span><br><span class="line">设定 strace输出的系统调用的结果集.-v 等与 abbrev&#x3D;none.默认为abbrev&#x3D;all. </span><br><span class="line">-e raw&#x3D;set </span><br><span class="line">将指 定的系统调用的参数以十六进制显示. </span><br><span class="line">-e signal&#x3D;set </span><br><span class="line">指定跟踪的系统信号.默认为all.如 signal&#x3D;!SIGIO(或者signal&#x3D;!io),表示不跟踪SIGIO信号. </span><br><span class="line">-e read&#x3D;set </span><br><span class="line">输出从指定文件中读出 的数据.例如: </span><br><span class="line">-e read&#x3D;3,5 </span><br><span class="line">-e write&#x3D;set </span><br><span class="line">输出写入到指定文件中的数据. </span><br><span class="line">-o filename </span><br><span class="line">将strace的输出写入文件filename </span><br><span class="line">-p pid </span><br><span class="line">跟踪指定的进程pid. </span><br><span class="line">-s strsize </span><br><span class="line">指定输出的字符串的最大长度.默认为32.文件名一直全部输出. </span><br><span class="line">-u username </span><br><span class="line">以username 的UID和GID执行被跟踪的命令</span><br><span class="line">复制代码</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">strace -c -p &#123;pid&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="8-查看disk-i-o"><a href="#8-查看disk-i-o" class="headerlink" title="8. 查看disk i/o"></a>8. 查看disk i/o</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dd <span class="keyword">if</span>=/dev/zero of=/root/test2.img bs=512 count=10000</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2016" class="archive-year">2016</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/08/02/2016-08-02-7-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8A/" class="archive-article-date">
-  	<time datetime="2016-08-01T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-08-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/08/02/2016-08-02-7-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8A/">7.计算机网络-网络安全(上)</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://lk668.github.io/2019/04/01/2019-04-01-linux%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/07/28/2016-07-28-6-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E5%BA%94%E7%94%A8%E5%B1%82/" class="archive-article-date">
-  	<time datetime="2016-07-27T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-28</time>
-</a>
+<nav id="article-nav">
+  
+    <a href="/2019/06/09/2019-06-09-%E7%AE%97%E6%B3%95-9-%E8%AE%B0%E5%BF%86%E5%8C%96%E6%90%9C%E7%B4%A2/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          算法（九）记忆化搜索
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/03/04/2019-03-04-OpenStack-Designate/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">OpenStack Designate简介</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/28/2016-07-28-6-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E5%BA%94%E7%94%A8%E5%B1%82/">6.计算机网络-应用层</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/07/25/2016-07-25-5-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E4%BC%A0%E8%BE%93%E5%B1%82/" class="archive-article-date">
-  	<time datetime="2016-07-24T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-25</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/25/2016-07-25-5-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E4%BC%A0%E8%BE%93%E5%B1%82/">5.计算机网络-传输层</a>
-    </h1>
+  <div id="SOHUCS" sid="2019-04-01-linux常用指令" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyvhnMVTX",
+        conf: "prod_5c45c4e333857ed581cff78d5c199d4f"
+    });
+</script>
+</script>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/07/23/2016-07-23-4-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%B1%82/" class="archive-article-date">
-  	<time datetime="2016-07-22T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-23</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/23/2016-07-23-4-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%B1%82/">4.计算机网络-网络层</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/07/18/2016-07-18-3-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/" class="archive-article-date">
-  	<time datetime="2016-07-17T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-18</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/18/2016-07-18-3-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/">3.计算机网络-数据链路层</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/07/15/2016-07-15-2-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%89%A9%E7%90%86%E5%B1%82/" class="archive-article-date">
-  	<time datetime="2016-07-14T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/15/2016-07-15-2-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%89%A9%E7%90%86%E5%B1%82/">2.计算机网络-物理层</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/07/10/2016-07-10-1-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A6%82%E8%BF%B0/" class="archive-article-date">
-  	<time datetime="2016-07-09T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-10</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/10/2016-07-10-1-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A6%82%E8%BF%B0/">1.计算机网络概述</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/04/10/2016-04-10-Hash%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0%E4%B9%8BMD5/" class="archive-article-date">
-  	<time datetime="2016-04-09T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-04-10</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/04/10/2016-04-10-Hash%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0%E4%B9%8BMD5/">Hash算法实现之MD5</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">数据结构</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/page/3/">« Prev</a><a class="page-number" href="/archives/">1</a><a class="page-number" href="/archives/page/2/">2</a><a class="page-number" href="/archives/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/archives/page/5/">5</a><a class="extend next" rel="next" href="/archives/page/5/">Next »</a>
-    </nav>
   
 
 
@@ -495,8 +347,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

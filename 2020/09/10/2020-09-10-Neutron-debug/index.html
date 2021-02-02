@@ -6,17 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://lk668.github.io">
-  <title>Archives | LiKai的博客</title>
+  <title>Neutron网络troubleshooting | LiKai的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
-<meta property="og:type" content="website">
-<meta property="og:title" content="LiKai的博客">
-<meta property="og:url" content="https://lk668.github.io/archives/page/2/index.html">
+  <meta name="description" content="本文简单介绍一下如何对openstack neutron网络做troubleshooting">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Neutron网络troubleshooting">
+<meta property="og:url" content="https://lk668.github.io/2020/09/10/2020-09-10-Neutron-debug/index.html">
 <meta property="og:site_name" content="LiKai的博客">
-<meta property="og:description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
+<meta property="og:description" content="本文简单介绍一下如何对openstack neutron网络做troubleshooting">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-09-09T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-02T10:50:10.716Z">
 <meta property="article:author" content="Li Kai">
-<meta property="article:tag" content="OpenStack,Kubernetes,Docker,网络,Python,Golang">
+<meta property="article:tag" content="openstack">
+<meta property="article:tag" content="neutron">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="LiKai的博客" type="application/atom+xml">
@@ -149,329 +152,225 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-2020-09-10-Neutron-debug" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Neutron网络troubleshooting
+    </h1>
+  
+
+        
+        <a href="/2020/09/10/2020-09-10-Neutron-debug/" class="archive-article-date">
+  	<time datetime="2020-09-09T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-10</time>
+</a>
+        
+      </header>
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本文简单介绍一下如何对openstack neutron网络做troubleshooting</p>
+<a id="more"></a>
+
+<h1 id="1-如何查看网络设备"><a href="#1-如何查看网络设备" class="headerlink" title="1. 如何查看网络设备"></a>1. 如何查看网络设备</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 可以查看网卡设备，以及网卡类型(openvswitch/tap/tun/veth)</span></span><br><span class="line">ip -d link show</span><br><span class="line"></span><br><span class="line"><span class="comment">#如何查看veth的对端地址</span></span><br><span class="line">ethtool -S qvb3ce0ad77-c9</span><br><span class="line">[root@tstack-con01 ~]<span class="comment"># ethtool -S qvb3ce0ad77-c9</span></span><br><span class="line">NIC statistics:</span><br><span class="line">     peer_ifindex: 23</span><br></pre></td></tr></table></figure>
+<h1 id="2-如何监听ovs上patch类型接口的数据包"><a href="#2-如何监听ovs上patch类型接口的数据包" class="headerlink" title="2. 如何监听ovs上patch类型接口的数据包"></a>2. 如何监听ovs上patch类型接口的数据包</h1><p>在linux下tap和veth设备都是正常的linux网络设备，可以使用ip/tcpdump来查看和监控状态。但是在ovs下，对于patch类型的接口，像patch-tun，只能对ovs是可见的，我们就不能够使用<code>tcpdump -i patch-tun</code>命令，会报错patch-tun设备不存在。</p>
+<p>那么对于patch-tun这种patch类型的ovs接口，如何进行数据追踪呢？步骤如下。</p>
+<ol>
+<li>创建一个<code>dummpy</code>类型的端口snooper0<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ip link add name snooper0 <span class="built_in">type</span> dummy</span><br><span class="line">ip link <span class="built_in">set</span> dev snooper0 up</span><br></pre></td></tr></table></figure></li>
+<li>将该端口绑定到<code>br-int</code>网桥，因为<code>patch-tun</code>位于该网桥    <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl add-port br-int snooper0</span><br></pre></td></tr></table></figure></li>
+<li>创建端口流量镜像来绑定snooper0和patch-tun  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#将进出patch-tun的流量全部镜像到snooper0网卡</span></span><br><span class="line">ovs-vsctl -- <span class="built_in">set</span> Bridge br-int mirrors=@m  -- --id=@snooper0 \</span><br><span class="line">  get Port snooper0  -- --id=@patch-tun get Port patch-tun \</span><br><span class="line">  -- --id=@m create Mirror name=mymirror select-dst-port=@patch-tun \</span><br><span class="line">  select-src-port=@patch-tun output-port=@snooper0 select_all=1</span><br></pre></td></tr></table></figure></li>
+<li>现在就可以通过监控snooper0网卡来获取patch-tun的流量  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -i snooper0</span><br></pre></td></tr></table></figure></li>
+<li>清除配置信息<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl clear Bridge br-int mirrors</span><br><span class="line">ovs-vsctl del-port br-int snooper0</span><br><span class="line">ip link delete dev snooper0</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h1 id="3-数据包传输问题定位"><a href="#3-数据包传输问题定位" class="headerlink" title="3. 数据包传输问题定位"></a>3. 数据包传输问题定位</h1><p>我们可以使用<code>ping</code>命令来快速定位问题</p>
+<ol>
+<li>从虚拟机ping外部主机，看是否能ping通，如果能，就没有什么问题</li>
+<li>如果不能ping通外部主机，从虚拟机ping虚拟机所在的主机，如果可以ping通，说明是计算节点和计算节点的gateway之间有什么问题</li>
+<li>如果不能ping通虚拟机所在的主机，那问题就出现在虚拟机和计算主机之间。This includes the bridge connecting the compute node’s main NIC with the vnet NIC of the instance.</li>
+<li>最后，在该计算几点再创建一台虚拟机，两台虚拟机相互ping，如果可以ping通，那基本定位为是主机防火墙的问题。</li>
+</ol>
+<h1 id="4-tcpdump"><a href="#4-tcpdump" class="headerlink" title="4. tcpdump"></a>4. tcpdump</h1><p>另外一个强大的工具是<code>tcpdump</code>。我们可以使用下面的命令来监控<code>ICMP</code>数据包</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -i any -n -v <span class="string">&#x27;icmp[icmptype] = icmp-echoreply or icmp[icmptype] = icmp-echo&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>然后在虚拟机、计算节点主机、外部主机分别运行该命令。然后利用ping来检查哪条链路出现了问题</p>
+<h1 id="5-iptables"><a href="#5-iptables" class="headerlink" title="5. iptables"></a>5. iptables</h1><p>在OpenStack中，我们的安全组是通过iptables来实现的。我们可以使用下面的命令来获取当前主机的iptables配置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables-save</span><br></pre></td></tr></table></figure>
+<h1 id="6-如何手动解绑定浮动IP"><a href="#6-如何手动解绑定浮动IP" class="headerlink" title="6. 如何手动解绑定浮动IP"></a>6. 如何手动解绑定浮动IP</h1><p>如果在执行解绑定浮动IP的时候，失败了，数据库无法释放该浮动ip，那么可以通过下面的命令，修改数据库来释放浮动IP</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select uuid from instances <span class="built_in">where</span> hostname = <span class="string">&#x27;hostname&#x27;</span>;</span><br><span class="line">mysql&gt; select * from fixed_ips <span class="built_in">where</span> instance_uuid = <span class="string">&#x27;&lt;uuid&gt;&#x27;</span>;</span><br><span class="line">mysql&gt; select * from floating_ips <span class="built_in">where</span> fixed_ip_id = <span class="string">&#x27;&lt;fixed_ip_id&gt;&#x27;</span>;</span><br><span class="line">mysql&gt; update floating_ips <span class="built_in">set</span> fixed_ip_id = NULL, host = NULL <span class="built_in">where</span></span><br><span class="line">       fixed_ip_id = <span class="string">&#x27;&lt;fixed_ip_id&gt;&#x27;</span>;</span><br></pre></td></tr></table></figure>
+<h1 id="7-DHCP-troubleshooting"><a href="#7-DHCP-troubleshooting" class="headerlink" title="7. DHCP troubleshooting"></a>7. DHCP troubleshooting</h1><p>当我们在openstack中创建网络并开启dhcp功能的时候，neutron会在网络节点创建一个名字为<code>qdhcp-&lt;network-id&gt;</code>的linux网络命名空间。在该网络明明空间配置一个和subnet同网段的ip，此ip来提供dhcp和dns功能。我们会在该命名空间下启动一个dnsmasq进程，该进程用来提供dhcp和dns服务。</p>
+<p>所以在dhcp出现问题的时候，使用如下步骤进行debug</p>
+<ol>
+<li>查看dhcp的请求是否到达了<code>qdhcp-&lt;network-id&gt;</code>命名空间的<code>tapXXXXX</code>网卡，如果没有到达，网络有问题。可以使用tcpdump来进行数据包的追踪。对于dhcp请求，使用udp协议，client端使用68端口，server端使用67端口  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -i br100 -n port 67 or port 68</span><br><span class="line"></span><br><span class="line">以下是在openstack网络节点qdhcp-768a8089-ac83-4961-8c08-dc14eaf5f78a网络命名空间的执行结果，可以查看到相应的服务</span><br><span class="line">[root@tstack-con01 log]# ip netns exec qdhcp-768a8089-ac83-4961-8c08-dc14eaf5f78a lsof -i:67</span><br><span class="line">COMMAND     PID   USER   FD   TYPE   DEVICE SIZE&#x2F;OFF NODE NAME</span><br><span class="line">dnsmasq 1592657 nobody    4u  IPv4 27757858      0t0  UDP *:bootps</span><br></pre></td></tr></table></figure></li>
+<li>如果请求可以正常到达该命名空间，那查看dnsmasq服务时候正常运行。如果没有运行，重启neutron-dhcp-agent</li>
+<li>如果dnsmasq正常运行，查看dnsmasq的log，看是否ip已经被分配完了，或者什么其他错误。可以通过<code>/var/log/syslog</code>或者<code>/varlog/messages</code>来查看dnsmasq的日志</li>
+</ol>
+<h1 id="8-DNS-troubleshooting"><a href="#8-DNS-troubleshooting" class="headerlink" title="8. DNS troubleshooting"></a>8. DNS troubleshooting</h1><p>对于dns服务，openstack也是利用<code>dnsmasq</code>来实现。可以使用下面的tcpdump命令来进行数据包的追踪</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -i br100 -n -v udp port 53</span><br></pre></td></tr></table></figure>
+<p>以下是在openstack网络节点qdhcp-768a8089-ac83-4961-8c08-dc14eaf5f78a网络命名空间的执行结果，可以查看到相应的dnsmasq服务运行在53端口上</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@tstack-con01 <span class="built_in">log</span>]<span class="comment"># ip netns exec qdhcp-768a8089-ac83-4961-8c08-dc14eaf5f78a lsof -i:53</span></span><br><span class="line">COMMAND     PID   USER   FD   TYPE   DEVICE SIZE/OFF NODE NAME</span><br><span class="line">dnsmasq 1592657 nobody    6u  IPv4 27757861      0t0  UDP host-10-1-0-2.openstacklocal:domain</span><br><span class="line">dnsmasq 1592657 nobody    7u  IPv4 27757862      0t0  TCP host-10-1-0-2.openstacklocal:domain (LISTEN)</span><br><span class="line">dnsmasq 1592657 nobody    8u  IPv4 27757863      0t0  UDP localhost:domain</span><br><span class="line">dnsmasq 1592657 nobody    9u  IPv4 27757864      0t0  TCP localhost:domain (LISTEN)</span><br><span class="line">dnsmasq 1592657 nobody   10u  IPv6 27757865      0t0  UDP tstack-con01:domain</span><br><span class="line">dnsmasq 1592657 nobody   11u  IPv6 27757866      0t0  TCP tstack-con01:domain (LISTEN)</span><br><span class="line">dnsmasq 1592657 nobody   12u  IPv6 27757867      0t0  UDP localhost:domain</span><br><span class="line">dnsmasq 1592657 nobody   13u  IPv6 27757868      0t0  TCP localhost:domain (LISTEN)</span><br><span class="line">[root@tstack-con01 <span class="built_in">log</span>]<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h1 id="9-参考工具"><a href="#9-参考工具" class="headerlink" title="9. 参考工具"></a>9. 参考工具</h1><p><a target="_blank" rel="noopener" href="https://github.com/yeasy/easyOVS">easyOVS</a> 是一个在openstack平台操控linux bridge， ovs，iptables的工具。他可以自动关联虚拟端口、vm的IP/MAC、VLAN tag、网络命名空间以及vm的iptables规则。用起来非常方便。</p>
+<p><code>参考文档</code></p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://docs.openstack.org/operations-guide/ops-network-troubleshooting.html">https://docs.openstack.org/operations-guide/ops-network-troubleshooting.html</a></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/12/10/2018-12-10-%E7%AE%97%E6%B3%95-8-Dijkstra/" class="archive-article-date">
-  	<time datetime="2018-12-09T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-12-10</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/12/10/2018-12-10-%E7%AE%97%E6%B3%95-8-Dijkstra/">算法（八）最短路径之Dijkstra</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">openstack</a>
         		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/10/22/2018-10-22-%E7%AE%97%E6%B3%95-7-%E5%B9%B6%E6%9F%A5%E9%9B%86/" class="archive-article-date">
-  	<time datetime="2018-10-21T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-22</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/10/22/2018-10-22-%E7%AE%97%E6%B3%95-7-%E5%B9%B6%E6%9F%A5%E9%9B%86/">算法（七）并查集</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
+      		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">neutron</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://lk668.github.io/2020/09/10/2020-09-10-Neutron-debug/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/09/20/2018-09-20-%E7%AE%97%E6%B3%95-6-%E4%BA%8C%E5%8F%89%E6%A0%91/" class="archive-article-date">
-  	<time datetime="2018-09-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-09-20</time>
-</a>
+<nav id="article-nav">
+  
+    <a href="/2020/09/20/2020-09-20-ECMP/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          基于ECMP的多活负载均衡策略
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/04/06/2020-04-06-kubernetes-pod-%E8%87%AA%E5%8A%A8%E4%BC%B8%E7%BC%A9/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">kubernetes中pod的自动伸缩</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/09/20/2018-09-20-%E7%AE%97%E6%B3%95-6-%E4%BA%8C%E5%8F%89%E6%A0%91/">算法（六）二叉树</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%A6%82%E4%BD%95%E6%9F%A5%E7%9C%8B%E7%BD%91%E7%BB%9C%E8%AE%BE%E5%A4%87"><span class="toc-number">1.</span> <span class="toc-text">1. 如何查看网络设备</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%A6%82%E4%BD%95%E7%9B%91%E5%90%ACovs%E4%B8%8Apatch%E7%B1%BB%E5%9E%8B%E6%8E%A5%E5%8F%A3%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85"><span class="toc-number">2.</span> <span class="toc-text">2. 如何监听ovs上patch类型接口的数据包</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%95%B0%E6%8D%AE%E5%8C%85%E4%BC%A0%E8%BE%93%E9%97%AE%E9%A2%98%E5%AE%9A%E4%BD%8D"><span class="toc-number">3.</span> <span class="toc-text">3. 数据包传输问题定位</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-tcpdump"><span class="toc-number">4.</span> <span class="toc-text">4. tcpdump</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-iptables"><span class="toc-number">5.</span> <span class="toc-text">5. iptables</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-%E5%A6%82%E4%BD%95%E6%89%8B%E5%8A%A8%E8%A7%A3%E7%BB%91%E5%AE%9A%E6%B5%AE%E5%8A%A8IP"><span class="toc-number">6.</span> <span class="toc-text">6. 如何手动解绑定浮动IP</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#7-DHCP-troubleshooting"><span class="toc-number">7.</span> <span class="toc-text">7. DHCP troubleshooting</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#8-DNS-troubleshooting"><span class="toc-number">8.</span> <span class="toc-text">8. DNS troubleshooting</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#9-%E5%8F%82%E8%80%83%E5%B7%A5%E5%85%B7"><span class="toc-number">9.</span> <span class="toc-text">9. 参考工具</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/07/20/2018-07-20-%E7%AE%97%E6%B3%95-5-%E5%9B%9E%E6%BA%AF/" class="archive-article-date">
-  	<time datetime="2018-07-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-07-20</time>
-</a>
-        </div>
-    	 
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/07/20/2018-07-20-%E7%AE%97%E6%B3%95-5-%E5%9B%9E%E6%BA%AF/">算法（五）回溯</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/07/10/2018-07-10-Python-Yield%E4%BD%BF%E7%94%A8/" class="archive-article-date">
-  	<time datetime="2018-07-09T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-07-10</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/07/10/2018-07-10-Python-Yield%E4%BD%BF%E7%94%A8/">Python yield使用</a>
-    </h1>
+  <div id="SOHUCS" sid="2020-09-10-Neutron-debug" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyvhnMVTX",
+        conf: "prod_5c45c4e333857ed581cff78d5c199d4f"
+    });
+</script>
+</script>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/07/06/2018-07-06-%E7%AE%97%E6%B3%95-4-%E5%89%8D%E7%BC%80%E5%92%8C/" class="archive-article-date">
-  	<time datetime="2018-07-05T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-07-06</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/07/06/2018-07-06-%E7%AE%97%E6%B3%95-4-%E5%89%8D%E7%BC%80%E5%92%8C/">算法（四）前缀和</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/05/20/2018-05-20-%E7%AE%97%E6%B3%95-3-%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE/" class="archive-article-date">
-  	<time datetime="2018-05-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-05-20</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/05/20/2018-05-20-%E7%AE%97%E6%B3%95-3-%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE/">算法（三）二分查找</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/04/21/2018-04-21-%E7%AE%97%E6%B3%95-2-DFS/" class="archive-article-date">
-  	<time datetime="2018-04-20T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-21</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/04/21/2018-04-21-%E7%AE%97%E6%B3%95-2-DFS/">算法（二）深度优先搜索DFS</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/">« Prev</a><a class="page-number" href="/archives/">1</a><span class="page-number current">2</span><a class="page-number" href="/archives/page/3/">3</a><a class="page-number" href="/archives/page/4/">4</a><a class="page-number" href="/archives/page/5/">5</a><a class="extend next" rel="next" href="/archives/page/3/">Next »</a>
-    </nav>
   
 
 
@@ -495,8 +394,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

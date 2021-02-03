@@ -6,17 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://lk668.github.io">
-  <title>Archives | LiKai的博客</title>
+  <title>ovn为外部主机提供dhcp服务 | LiKai的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
-<meta property="og:type" content="website">
-<meta property="og:title" content="LiKai的博客">
-<meta property="og:url" content="https://lk668.github.io/archives/page/5/index.html">
+  <meta name="description" content="本文简单介绍一下OVN是如何通过external logical port来为外部主机提供DHCP服务。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ovn为外部主机提供dhcp服务">
+<meta property="og:url" content="https://lk668.github.io/2020/09/21/2020-09-21-ovn-dhcp-for-external-host/index.html">
 <meta property="og:site_name" content="LiKai的博客">
-<meta property="og:description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
+<meta property="og:description" content="本文简单介绍一下OVN是如何通过external logical port来为外部主机提供DHCP服务。">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-09-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-03T03:52:57.794Z">
 <meta property="article:author" content="Li Kai">
-<meta property="article:tag" content="OpenStack,Kubernetes,Docker,网络,Python,Golang">
+<meta property="article:tag" content="ovn">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="LiKai的博客" type="application/atom+xml">
@@ -149,329 +151,230 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-2020-09-21-ovn-dhcp-for-external-host" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ovn为外部主机提供dhcp服务
+    </h1>
+  
+
+        
+        <a href="/2020/09/21/2020-09-21-ovn-dhcp-for-external-host/" class="archive-article-date">
+  	<time datetime="2020-09-20T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-21</time>
+</a>
+        
+      </header>
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本文简单介绍一下OVN是如何通过external logical port来为外部主机提供DHCP服务。</p>
+<a id="more"></a>
+<h2 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h2><p><strong>Native OVN services for external logical ports</strong></p>
+<p>以下是摘自OVN官网，对external logical ports的介绍</p>
+<p>To support OVN native services (like DHCP/IPv6 RA/DNS lookup) to the cloud resources which are external, OVN supports external logical ports.</p>
+<p>Below are some of the use cases where external ports can be used.</p>
+<ul>
+<li>VMs connected to SR-IOV nics - Traffic from these VMs by passes the kernel stack and local ovn-controller do not bind these ports and cannot serve the native services.</li>
+<li>When CMS supports provisioning baremetal servers. </li>
+</ul>
+<p>OVN will provide the native services if CMS has done the below  configuration in the OVN Northbound Database.</p>
+<ul>
+<li><p>A row is created in <strong>Logical_Switch_Port</strong>, configuring the <strong>addresses</strong> column and setting the type to <strong>external</strong>.</p>
+</li>
+<li><p><strong>ha_chassis_group</strong> column is configured.</p>
+</li>
+<li><p>The HA chassis which belongs to the HA chassis group has the <strong>ovn-bridge-mappings</strong> configured and has proper L2 connectivity so that it can receive the DHCP and other related request packets from these external resources.</p>
+</li>
+<li><p>The Logical_Switch of this port has a <strong>localnet port</strong>.</p>
+</li>
+<li><p>Native OVN services are enabled by configuring the DHCP options like the way it is done for the normal logical ports.</p>
+</li>
+</ul>
+<p>It is recommended to use the same HA chassis group for all the external ports of a logical switch. Otherwise, the physical switch might see MAC flap issue when different chassis provide the native services. For example when supporting native DHCPv4 service, DHCPv4 server mac (configured in options:server_mac column in table DHCP_Options) originating from different ports can cause MAC flap issue. The MAC of the logical router IP(s) can also flap if the same HA chassis group is not set for all the external ports of a logical switch.</p>
+<h2 id="2-配置流程"><a href="#2-配置流程" class="headerlink" title="2. 配置流程"></a>2. 配置流程</h2><h3 id="2-1-安装ovs"><a href="#2-1-安装ovs" class="headerlink" title="2.1 安装ovs"></a>2.1 安装ovs</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y openvswitch</span><br><span class="line">systemctl <span class="built_in">enable</span> --now openvswitch</span><br></pre></td></tr></table></figure>
+<h3 id="2-2-安装-配置ovn"><a href="#2-2-安装-配置ovn" class="headerlink" title="2.2 安装/配置ovn"></a>2.2 安装/配置ovn</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">yum install -y unbound-libs ovn ovn-host ovn-central </span><br><span class="line"></span><br><span class="line">systemctl <span class="built_in">enable</span> --now ovn-northd</span><br><span class="line">systemctl <span class="built_in">enable</span> --now ovn-controller</span><br><span class="line"></span><br><span class="line">配置ovn controller。（在执行ovn-northd的节点执行下面的命令）。ovn-northd启动的时候会启动两个ovsdb-server进程，一个是服务northbound database，一个是用来服务southbound database,为了让其他的几点连接到southbound database，我们需要将ovsdb-server监听tcp服务，就需要执行下面的命令</span><br><span class="line">ovn-sbctl set-connection ptcp:6642</span><br></pre></td></tr></table></figure>
+<h3 id="2-3-创建br-int网桥-配置ovs"><a href="#2-3-创建br-int网桥-配置ovs" class="headerlink" title="2.3 创建br-int网桥,配置ovs"></a>2.3 创建br-int网桥,配置ovs</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl add-br br-int</span><br><span class="line">设置br-int所支持的openflow协议</span><br><span class="line">ovs-vsctl set bridge br-int \</span><br><span class="line">    protocols&#x3D;OpenFlow10,OpenFlow11,OpenFlow12,OpenFlow13,OpenFlow14,OpenFlow15</span><br><span class="line"></span><br><span class="line">登录每个计算节点，将ovn-controller连接到southbound database。通过ovs的external_ids来配置。其中10.0.2.128是ovn-northd所在的几点</span><br><span class="line">ovs-vsctl set open_vswitch .  \</span><br><span class="line">  external_ids:ovn-remote&#x3D;tcp:10.0.2.128:6642 \</span><br><span class="line">  external_ids:ovn-encap-ip&#x3D;$(ip addr show ens33| awk &#39;$1 &#x3D;&#x3D; &quot;inet&quot; &#123;print $2&#125;&#39; | cut -f1 -d&#x2F;) \</span><br><span class="line">  external_ids:ovn-encap-type&#x3D;geneve \</span><br><span class="line">  external_ids:system-id&#x3D;$(hostname)</span><br><span class="line">验证</span><br><span class="line">ovs-vsctl list open_vswitch</span><br></pre></td></tr></table></figure>
+<h3 id="2-4-配置external-logical-port"><a href="#2-4-配置external-logical-port" class="headerlink" title="2.4 配置external logical port"></a>2.4 配置external logical port</h3><h4 id="2-4-1-创建-配置-logical-switch，-logical-switch-port，dhcp-option"><a href="#2-4-1-创建-配置-logical-switch，-logical-switch-port，dhcp-option" class="headerlink" title="2.4.1 创建/配置 logical switch， logical switch port，dhcp option"></a>2.4.1 创建/配置 logical switch， logical switch port，dhcp option</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#创建net0的logical switch</span></span><br><span class="line">ovn-nbctl ls-add net0</span><br><span class="line"><span class="comment">#配置logical switch的subnet</span></span><br><span class="line">ovn-nbctl <span class="built_in">set</span> logical_switch net0 \</span><br><span class="line">  other_config:subnet=<span class="string">&quot;10.0.2.0/24&quot;</span> \</span><br><span class="line">  other_config:exclude_ips=<span class="string">&quot;10.0.2.1..10.0.2.10&quot;</span></span><br><span class="line"><span class="comment">#创建DHCP option</span></span><br><span class="line">ovn-nbctl dhcp-options-create 10.0.2.0/24</span><br><span class="line"><span class="comment">#用下面的命令来获取DHCP option的uuid</span></span><br><span class="line">CIDR_UUID=$(ovn-nbctl --bare --columns=_uuid find dhcp_options cidr=<span class="string">&quot;10.0.2.0/24&quot;</span>)</span><br><span class="line">ovn-nbctl dhcp-options-set-options <span class="variable">$&#123;CIDR_UUID&#125;</span> \</span><br><span class="line">  lease_time=3600 \</span><br><span class="line">  router=10.0.2.3 \</span><br><span class="line">  server_id=10.0.2.3 \</span><br><span class="line">  server_mac=c0:ff:ee:00:00:01</span><br><span class="line"><span class="comment"># 用下面的命令来验证</span></span><br><span class="line">ovn-nbctl list dhcp_options</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建逻辑端口</span></span><br><span class="line">ovn-nbctl lsp-add net0 port1</span><br><span class="line"><span class="comment"># 配置端口的mac地址，ip地址配置为dynamic，自动获取。mac地址为物理机或者sriov网卡的mac地址</span></span><br><span class="line">ovn-nbctl lsp-set-addresses port1 <span class="string">&quot;00:0c:29:e7:ff:ac dynamic&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 为该端口绑定dhcp options</span></span><br><span class="line">ovn-nbctl lsp-set-dhcpv4-options port1 <span class="variable">$CIDR_UUID</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#创建完成以后，可以用下面的命令验证,可以看到分配的ip是10.0.2.11</span></span><br><span class="line">ovn-nbctl list logical_switch_port</span><br><span class="line">[root@localhost ~]<span class="comment"># ovn-nbctl list logical_switch_port</span></span><br><span class="line">_uuid               : db3d91cb-3ee9-4345-b203-8eecf8a92eff</span><br><span class="line">addresses           : [<span class="string">&quot;00:0c:29:e7:ff:ac dynamic&quot;</span>]</span><br><span class="line">dhcpv4_options      : c074e117-b4a0-4f12-93a8-0f7e2f87e8a9</span><br><span class="line">dhcpv6_options      : []</span><br><span class="line">dynamic_addresses   : <span class="string">&quot;00:0c:29:e7:ff:ac 10.0.2.11&quot;</span></span><br><span class="line">enabled             : []</span><br><span class="line">external_ids        : &#123;&#125;</span><br><span class="line">ha_chassis_group    : []</span><br><span class="line">name                : port1</span><br><span class="line">options             : &#123;&#125;</span><br><span class="line">parent_name         : []</span><br><span class="line">port_security       : []</span><br><span class="line">tag                 : []</span><br><span class="line">tag_request         : []</span><br><span class="line"><span class="built_in">type</span>                : <span class="string">&quot;&quot;</span></span><br><span class="line">up                  : <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 用下面的命令来模拟dhcp请求，验证是否能正常拿到ip</span></span><br><span class="line">ovn-trace --summary net0 <span class="string">&#x27;</span></span><br><span class="line"><span class="string">  inport==&quot;port1&quot; &amp;&amp;</span></span><br><span class="line"><span class="string">  eth.src==00:0c:29:e7:ff:ac &amp;&amp;</span></span><br><span class="line"><span class="string">  ip4.src==0.0.0.0 &amp;&amp;</span></span><br><span class="line"><span class="string">  ip.ttl==1 &amp;&amp;</span></span><br><span class="line"><span class="string">  ip4.dst==255.255.255.255 &amp;&amp;</span></span><br><span class="line"><span class="string">  udp.src==68 &amp;&amp;</span></span><br><span class="line"><span class="string">  udp.dst==67&#x27;</span></span><br><span class="line"><span class="comment"># 此时用ovn-sbctl dump-flows查看流表，可以看到有两条是用来解析dhcp的流表信息</span></span><br><span class="line">[root@localhost ~]<span class="comment"># ovn-sbctl dump-flows|grep 10.0.2.11</span></span><br><span class="line">  table=14(ls_in_dhcp_options ), priority=100  , match=(inport == <span class="string">&quot;port1&quot;</span> &amp;&amp; eth.src == 00:0c:29:e7:ff:ac &amp;&amp; ip4.src == 0.0.0.0 &amp;&amp; ip4.dst == 255.255.255.255 &amp;&amp; udp.src == 68 &amp;&amp; udp.dst == 67), action=(reg0[3] = put_dhcp_opts(offerip = 10.0.2.11, lease_time = 3600, netmask = 255.255.255.0, router = 10.0.2.3, server_id = 10.0.2.3); next;)</span><br><span class="line">  table=14(ls_in_dhcp_options ), priority=100  , match=(inport == <span class="string">&quot;port1&quot;</span> &amp;&amp; eth.src == 00:0c:29:e7:ff:ac &amp;&amp; ip4.src == 10.0.2.11 &amp;&amp; ip4.dst == &#123;10.0.2.3, 255.255.255.255&#125; &amp;&amp; udp.src == 68 &amp;&amp; udp.dst == 67), action=(reg0[3] = put_dhcp_opts(offerip = 10.0.2.11, lease_time = 3600, netmask = 255.255.255.0, router = 10.0.2.3, server_id = 10.0.2.3); next;)</span><br><span class="line">[root@localhost ~]<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h4 id="2-4-2-配置逻辑端口类型为external"><a href="#2-4-2-配置逻辑端口类型为external" class="headerlink" title="2.4.2 配置逻辑端口类型为external"></a>2.4.2 配置逻辑端口类型为external</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ovn-nbctl lsp-set-type port1 external</span><br><span class="line"><span class="comment">#此时再次查看流表信息，改成external后，流表信息没有了</span></span><br><span class="line">[root@localhost ~]<span class="comment"># ovn-sbctl dump-flows|grep 10.0.2.11</span></span><br><span class="line">[root@localhost ~]<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h4 id="2-4-3-创建路基路由，并将它与net0逻辑交换机连接"><a href="#2-4-3-创建路基路由，并将它与net0逻辑交换机连接" class="headerlink" title="2.4.3 创建路基路由，并将它与net0逻辑交换机连接"></a>2.4.3 创建路基路由，并将它与net0逻辑交换机连接</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ovn-nbctl lr-add lr0</span><br><span class="line">ovn-nbctl lrp-add lr0 lr0-net0 a0:10:00:00:00:01 10.0.2.3/24</span><br><span class="line">ovn-nbctl lsp-add net0 net0-lr0</span><br><span class="line">ovn-nbctl <span class="built_in">set</span> Logical_Switch_Port net0-lr0 <span class="built_in">type</span>=router \</span><br><span class="line">    options:router-port=lr0-net0 addresses=router</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加完router后，再次查看流表信息，有一条用作arp恢复的流表</span></span><br><span class="line">[root@localhost ~]<span class="comment"># ovn-sbctl dump-flows|grep 10.0.2.11</span></span><br><span class="line">  table=12(lr_in_arp_resolve  ), priority=100  , match=(outport == <span class="string">&quot;lr0-net0&quot;</span> &amp;&amp; reg0 == 10.0.2.11), action=(eth.dst = 00:0c:29:e7:ff:ac; next;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="2-4-4-创建localnet-port。创建br-phys网桥，来绑定物理网卡"><a href="#2-4-4-创建localnet-port。创建br-phys网桥，来绑定物理网卡" class="headerlink" title="2.4.4 创建localnet port。创建br-phys网桥，来绑定物理网卡"></a>2.4.4 创建localnet port。创建br-phys网桥，来绑定物理网卡</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建br-phys网桥，绑定ens37物理网卡</span></span><br><span class="line">ovs-vsctl add-br br-phys</span><br><span class="line">ovs-vsctl add-port br-phys ens37</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在net0 逻辑交换机上创建localnet 端口</span></span><br><span class="line">ovn-nbctl lsp-add net0 ln-public</span><br><span class="line">ovn-nbctl lsp-set-addresses ln-public unknown</span><br><span class="line">ovn-nbctl lsp-set-type ln-public localnet</span><br><span class="line">ovn-nbctl lsp-set-options ln-public network_name=phys</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将network phys和ovs网桥br-phys做个映射</span></span><br><span class="line">ovs-vsctl <span class="built_in">set</span> open . external-ids:pings=phys:br-phys</span><br></pre></td></tr></table></figure>
+<h4 id="2-4-5-创建ha-chassis-group，绑定port1关联到ha-chassis-group"><a href="#2-4-5-创建ha-chassis-group，绑定port1关联到ha-chassis-group" class="headerlink" title="2.4.5 创建ha_chassis_group，绑定port1关联到ha_chassis_group"></a>2.4.5 创建ha_chassis_group，绑定port1关联到ha_chassis_group</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建ha chassis group</span></span><br><span class="line">ovn-nbctl ha-chassis-group-add hagrp1</span><br><span class="line"><span class="comment"># 获取所有的chassis</span></span><br><span class="line">ovn-sbctl show 或者ovn-sbctl list chassis</span><br><span class="line"><span class="comment"># 将logical switch port所在的chassis添加到ha chassis group</span></span><br><span class="line">ovn-nbctl ha-chassis-group-add-chassis hagrp1 &#123;chassis name&#125; 30</span><br><span class="line"></span><br><span class="line"><span class="comment">#获取hagrp1的uuid</span></span><br><span class="line">hagrp1_uuid=`ovn-nbctl --bare --columns _uuid find ha_chassis_group name=<span class="string">&quot;hagrp1&quot;</span>`</span><br><span class="line"><span class="comment">#关联port1到hagrp1</span></span><br><span class="line">ovn-nbctl <span class="built_in">set</span> Logical_Switch_Port port1 \</span><br><span class="line">ha-chassis-group=<span class="variable">$hagrp1_uuid</span></span><br></pre></td></tr></table></figure>
+<h4 id="2-4-6-此时再次查看流表"><a href="#2-4-6-此时再次查看流表" class="headerlink" title="2.4.6 此时再次查看流表"></a>2.4.6 此时再次查看流表</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">已经有dhcp相关的流表信息</span><br><span class="line">[root@localhost ~]<span class="comment"># ovn-sbctl dump-flows|grep 10.0.2.11</span></span><br><span class="line">  table=14(ls_in_dhcp_options ), priority=100  , match=(inport == <span class="string">&quot;ln-public&quot;</span> &amp;&amp; eth.src == 00:0c:29:e7:ff:ac &amp;&amp; ip4.src == 0.0.0.0 &amp;&amp; ip4.dst == 255.255.255.255 &amp;&amp; udp.src == 68 &amp;&amp; udp.dst == 67 &amp;&amp; is_chassis_resident(<span class="string">&quot;port1&quot;</span>)), action=(reg0[3] = put_dhcp_opts(offerip = 10.0.2.11, lease_time = 3600, netmask = 255.255.255.0, router = 10.0.2.3, server_id = 10.0.2.3); next;)</span><br><span class="line">  table=14(ls_in_dhcp_options ), priority=100  , match=(inport == <span class="string">&quot;ln-public&quot;</span> &amp;&amp; eth.src == 00:0c:29:e7:ff:ac &amp;&amp; ip4.src == 10.0.2.11 &amp;&amp; ip4.dst == &#123;10.0.2.3, 255.255.255.255&#125; &amp;&amp; udp.src == 68 &amp;&amp; udp.dst == 67 &amp;&amp; is_chassis_resident(<span class="string">&quot;port1&quot;</span>)), action=(reg0[3] = put_dhcp_opts(offerip = 10.0.2.11, lease_time = 3600, netmask = 255.255.255.0, router = 10.0.2.3, server_id = 10.0.2.3); next;)</span><br><span class="line">  table=12(lr_in_arp_resolve  ), priority=100  , match=(outport == <span class="string">&quot;lr0-net0&quot;</span> &amp;&amp; reg0 == 10.0.2.11), action=(eth.dst = 00:0c:29:e7:ff:ac; next;)</span><br><span class="line">[root@localhost ~]<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h2 id="3-验证dhcp功能"><a href="#3-验证dhcp功能" class="headerlink" title="3 验证dhcp功能"></a>3 验证dhcp功能</h2><p>登录到mac地址是00:0c:29:e7:ff:ac的虚拟机，执行dhclient ens33。可以看到准确的拿到了ip。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># dhclient ens33</span></span><br><span class="line">[root@localhost ~]<span class="comment"># ifconfig</span></span><br><span class="line">ens33: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        inet 10.0.2.11  netmask 255.255.255.0  broadcast 10.0.2.255</span><br><span class="line">        inet6 fe80::7591:8e8e:dd1a:1537  prefixlen 64  scopeid 0x20&lt;link&gt;</span><br><span class="line">        inet6 fe80::ff75:6c29:b180:65b5  prefixlen 64  scopeid 0x20&lt;link&gt;</span><br><span class="line">        ether 00:0c:29:e7:ff:ac  txqueuelen 1000  (Ethernet)</span><br><span class="line">        RX packets 145  bytes 26129 (25.5 KiB)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 81  bytes 12217 (11.9 KiB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br><span class="line"></span><br><span class="line">lo: flags=73&lt;UP,LOOPBACK,RUNNING&gt;  mtu 65536</span><br><span class="line">        inet 127.0.0.1  netmask 255.0.0.0</span><br><span class="line">        inet6 ::1  prefixlen 128  scopeid 0x10&lt;host&gt;</span><br><span class="line">        loop  txqueuelen 1000  (Local Loopback)</span><br><span class="line">        RX packets 532  bytes 46180 (45.0 KiB)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 532  bytes 46180 (45.0 KiB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br><span class="line"></span><br><span class="line">[root@localhost ~]<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h2 id="4-遇到的问题"><a href="#4-遇到的问题" class="headerlink" title="4. 遇到的问题"></a>4. 遇到的问题</h2><ol>
+<li>重启ovn所在的虚拟机chassis的名字改了，改成了uuid。所以添加chassis到ha-chassis-group的时候一定要用uuid。</li>
+<li>重启ovs，ovn-controller并不会自动下发流表，需要重启ovn-controller。</li>
+<li>ovn-nbctl ha-chassis-group-del-chassis命令不存在，在社区提了个patch，解了。<a target="_blank" rel="noopener" href="https://github.com/ovn-org/ovn/commit/358d162c071cfb56ce9fd113ccc5e3b599022fe1">https://github.com/ovn-org/ovn/commit/358d162c071cfb56ce9fd113ccc5e3b599022fe1</a></li>
+<li>ovs为网桥关联物理网卡的话，物理网卡不能有ip，不然网络会瘫痪。</li>
+</ol>
+<p><code>参考文档</code></p>
+<p>ovn简介：<a target="_blank" rel="noopener" href="http://galsagie.github.io/2015/04/20/ovn-1/">http://galsagie.github.io/2015/04/20/ovn-1/</a></p>
+<p>ovn external logical port代相关代码和文档：</p>
+<ul>
+<li>ovn external logical port简介：<a target="_blank" rel="noopener" href="https://man7.org/linux/man-pages/man7/ovn-architecture.7.html">https://man7.org/linux/man-pages/man7/ovn-architecture.7.html</a></li>
+<li>ovn external logical port的bug需求：<a target="_blank" rel="noopener" href="https://bugzilla.redhat.com/show_bug.cgi?id=1666673">https://bugzilla.redhat.com/show_bug.cgi?id=1666673</a></li>
+<li>ovn external logical portd的代码和测试用例：<a target="_blank" rel="noopener" href="https://github.com/openvswitch/ovs/commit/96080083581275afaec8bc281d6a648aff7ef39e#diff-97d4cf929e4894ef95c4bfde3f896c34">https://github.com/openvswitch/ovs/commit/96080083581275afaec8bc281d6a648aff7ef39e#diff-97d4cf929e4894ef95c4bfde3f896c34</a></li>
+<li>ovn dhcp的一个example ：<a target="_blank" rel="noopener" href="https://blog.oddbit.com/post/2019-12-19-ovn-and-dhcp/">https://blog.oddbit.com/post/2019-12-19-ovn-and-dhcp/</a></li>
+</ul>
+<p>ovn gateway出网方案：<a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000020349044">https://segmentfault.com/a/1190000020349044</a></p>
+<p>ovn native dhcp support：<a target="_blank" rel="noopener" href="https://numans.blog/2016/08/09/native-dhcp-support-in-ovn/">https://numans.blog/2016/08/09/native-dhcp-support-in-ovn/</a></p>
+<p>ovn Genevevs VXLAN： <a target="_blank" rel="noopener" href="https://blog.russellbryant.net/2017/05/30/ovn-geneve-vs-vxlan-does-it-matter/">https://blog.russellbryant.net/2017/05/30/ovn-geneve-vs-vxlan-does-it-matter/</a></p>
+<p>ovs配置常见问题:（ovs绑定物理网卡时，物理网卡不能配置ip）:<a target="_blank" rel="noopener" href="https://docs.openvswitch.org/en/latest/faq/issues/">https://docs.openvswitch.org/en/latest/faq/issues/</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2016" class="archive-year">2016</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/07/18/2016-07-18-3-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/" class="archive-article-date">
-  	<time datetime="2016-07-17T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-18</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/18/2016-07-18-3-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/">3.计算机网络-数据链路层</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ovn</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://lk668.github.io/2020/09/21/2020-09-21-ovn-dhcp-for-external-host/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/07/15/2016-07-15-2-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%89%A9%E7%90%86%E5%B1%82/" class="archive-article-date">
-  	<time datetime="2016-07-14T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-15</time>
-</a>
+<nav id="article-nav">
+  
+    <a href="/2020/10/12/2020-10-12-neutron-metadata/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          neutron metadata 服务详解
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/09/10/2020-09-10-Neutron-debug/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Neutron网络troubleshooting</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/15/2016-07-15-2-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%89%A9%E7%90%86%E5%B1%82/">2.计算机网络-物理层</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">1. 简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E9%85%8D%E7%BD%AE%E6%B5%81%E7%A8%8B"><span class="toc-number">2.</span> <span class="toc-text">2. 配置流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%AE%89%E8%A3%85ovs"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 安装ovs</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E5%AE%89%E8%A3%85-%E9%85%8D%E7%BD%AEovn"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 安装&#x2F;配置ovn</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E5%88%9B%E5%BB%BAbr-int%E7%BD%91%E6%A1%A5-%E9%85%8D%E7%BD%AEovs"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 创建br-int网桥,配置ovs</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E9%85%8D%E7%BD%AEexternal-logical-port"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 配置external logical port</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-1-%E5%88%9B%E5%BB%BA-%E9%85%8D%E7%BD%AE-logical-switch%EF%BC%8C-logical-switch-port%EF%BC%8Cdhcp-option"><span class="toc-number">2.4.1.</span> <span class="toc-text">2.4.1 创建&#x2F;配置 logical switch， logical switch port，dhcp option</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-2-%E9%85%8D%E7%BD%AE%E9%80%BB%E8%BE%91%E7%AB%AF%E5%8F%A3%E7%B1%BB%E5%9E%8B%E4%B8%BAexternal"><span class="toc-number">2.4.2.</span> <span class="toc-text">2.4.2 配置逻辑端口类型为external</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-3-%E5%88%9B%E5%BB%BA%E8%B7%AF%E5%9F%BA%E8%B7%AF%E7%94%B1%EF%BC%8C%E5%B9%B6%E5%B0%86%E5%AE%83%E4%B8%8Enet0%E9%80%BB%E8%BE%91%E4%BA%A4%E6%8D%A2%E6%9C%BA%E8%BF%9E%E6%8E%A5"><span class="toc-number">2.4.3.</span> <span class="toc-text">2.4.3 创建路基路由，并将它与net0逻辑交换机连接</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-4-%E5%88%9B%E5%BB%BAlocalnet-port%E3%80%82%E5%88%9B%E5%BB%BAbr-phys%E7%BD%91%E6%A1%A5%EF%BC%8C%E6%9D%A5%E7%BB%91%E5%AE%9A%E7%89%A9%E7%90%86%E7%BD%91%E5%8D%A1"><span class="toc-number">2.4.4.</span> <span class="toc-text">2.4.4 创建localnet port。创建br-phys网桥，来绑定物理网卡</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-5-%E5%88%9B%E5%BB%BAha-chassis-group%EF%BC%8C%E7%BB%91%E5%AE%9Aport1%E5%85%B3%E8%81%94%E5%88%B0ha-chassis-group"><span class="toc-number">2.4.5.</span> <span class="toc-text">2.4.5 创建ha_chassis_group，绑定port1关联到ha_chassis_group</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-6-%E6%AD%A4%E6%97%B6%E5%86%8D%E6%AC%A1%E6%9F%A5%E7%9C%8B%E6%B5%81%E8%A1%A8"><span class="toc-number">2.4.6.</span> <span class="toc-text">2.4.6 此时再次查看流表</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E9%AA%8C%E8%AF%81dhcp%E5%8A%9F%E8%83%BD"><span class="toc-number">3.</span> <span class="toc-text">3 验证dhcp功能</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">4.</span> <span class="toc-text">4. 遇到的问题</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/07/10/2016-07-10-1-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A6%82%E8%BF%B0/" class="archive-article-date">
-  	<time datetime="2016-07-09T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-10</time>
-</a>
-        </div>
-    	 
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/10/2016-07-10-1-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A6%82%E8%BF%B0/">1.计算机网络概述</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/04/10/2016-04-10-Hash%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0%E4%B9%8BMD5/" class="archive-article-date">
-  	<time datetime="2016-04-09T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-04-10</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/04/10/2016-04-10-Hash%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0%E4%B9%8BMD5/">Hash算法实现之MD5</a>
-    </h1>
+  <div id="SOHUCS" sid="2020-09-21-ovn-dhcp-for-external-host" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyvhnMVTX",
+        conf: "prod_524cf31a894acd71141255b9d0bc7d4f"
+    });
+</script>
+</script>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/04/03/2016-04-03-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%93%BE%E8%A1%A8/" class="archive-article-date">
-  	<time datetime="2016-04-02T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-04-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/04/03/2016-04-03-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%93%BE%E8%A1%A8/">数据结构-链表</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">数据结构</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/04/02/2016-04-02-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%98%9F%E5%88%97/" class="archive-article-date">
-  	<time datetime="2016-04-01T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-04-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/04/02/2016-04-02-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%98%9F%E5%88%97/">数据结构-队列</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">数据结构</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/04/01/2016-04-01-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%A0%88/" class="archive-article-date">
-  	<time datetime="2016-03-31T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-04-01</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/04/01/2016-04-01-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%A0%88/">数据结构-栈</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">数据结构</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/03/28/2016-03-28-shell/" class="archive-article-date">
-  	<time datetime="2016-03-27T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-03-28</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/03/28/2016-03-28-shell/">Shell基础</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">shell</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/page/4/">« Prev</a><a class="page-number" href="/archives/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/3/">3</a><a class="page-number" href="/archives/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/archives/page/6/">6</a><a class="extend next" rel="next" href="/archives/page/6/">Next »</a>
-    </nav>
   
 
 
@@ -495,8 +398,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

@@ -6,23 +6,18 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://lk668.github.io">
-  <title>基于ECMP的多活负载均衡策略 | LiKai的博客</title>
+  <title>Archives | LiKai的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="本文简单介绍一下，如何基于ECMP，使用Quagga+LVS+Keepalived构建多活负载均衡方案">
-<meta property="og:type" content="article">
-<meta property="og:title" content="基于ECMP的多活负载均衡策略">
-<meta property="og:url" content="https://lk668.github.io/2020/09/20/2020-09-20-ECMP/index.html">
+  <meta name="description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
+<meta property="og:type" content="website">
+<meta property="og:title" content="LiKai的博客">
+<meta property="og:url" content="https://lk668.github.io/archives/page/6/index.html">
 <meta property="og:site_name" content="LiKai的博客">
-<meta property="og:description" content="本文简单介绍一下，如何基于ECMP，使用Quagga+LVS+Keepalived构建多活负载均衡方案">
+<meta property="og:description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://lk668.github.io/img/loadbalancer/ecmp-1.png">
-<meta property="og:image" content="https://lk668.github.io/img/loadbalancer/ecmp-2.png">
-<meta property="article:published_time" content="2020-09-19T16:00:00.000Z">
-<meta property="article:modified_time" content="2021-02-02T08:17:20.984Z">
 <meta property="article:author" content="Li Kai">
-<meta property="article:tag" content="负载均衡">
+<meta property="article:tag" content="OpenStack,Kubernetes,Docker,网络,Python,Golang">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://lk668.github.io/img/loadbalancer/ecmp-1.png">
   
     <link rel="alternative" href="/atom.xml" title="LiKai的博客" type="application/atom+xml">
   
@@ -154,237 +149,63 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-2020-09-20-ECMP" class="article article-type-post " itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
+            
   
-    <h1 class="article-title" itemprop="name">
-      基于ECMP的多活负载均衡策略
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2016" class="archive-year">2016</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      	<div class="article-meta">
+	      	<a href="/2016/03/25/2016-03-25-hello-world/" class="archive-article-date">
+  	<time datetime="2016-03-24T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-03-25</time>
+</a>
+        </div>
+    	 
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2016/03/25/2016-03-25-hello-world/">Hello World</a>
     </h1>
   
 
-        
-        <a href="/2020/09/20/2020-09-20-ECMP/" class="archive-article-date">
-  	<time datetime="2020-09-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文简单介绍一下，如何基于ECMP，使用Quagga+LVS+Keepalived构建多活负载均衡方案</p>
-<a id="more"></a>
-
-<h1 id="1-背景介绍"><a href="#1-背景介绍" class="headerlink" title="1. 背景介绍"></a>1. 背景介绍</h1><p>负载均衡，主要用于大规模分布式集群下，提供高性能服务。为了给负载均衡器提供高可用，一般利用主备或者主主模式实现。主备模式即只有主负载均衡器提供负载均衡功能，当主负载均衡器出现异常时，自动切换到备负载均衡器，继续提供负载均衡功能。主主模式（也称之为双活负载均衡），两个负载均衡器同时提供负载均衡服务，全部为主模式，流量均摊到两个负载均衡设备。本文基于LVS+OSPF+Keepalived搭建了一套多活负载均衡。</p>
-<h2 id="1-1-LVS"><a href="#1-1-LVS" class="headerlink" title="1.1 LVS"></a>1.1 LVS</h2><p>LVS(Linux Virtual Server)即linux虚拟服务器。是一个虚拟的服务器集群系统，讲发送给VIP的请求，转发给对应的后端服务器。从而起到负载均衡的作用。后端服务器处理完请求，将结果返还给用户。LVS主要通过工作在linux内核层的ipvs来实现。而对于ipvs，我们可以用ipvsadm来进行配置。ipvsadm工作<br>在用户空间，ipvs工作在内核空间。ipvsadm和ipvs的关系就好比是iptables和netfilter的关系。综上所述，LVS由两部分组成，ipvs和ipvsadm</p>
-<p>ipvsadm: LVS管理工具，通过ipvsadm定义和管理集群规则。<br>ipvs：LVS核心实现，根据定义好的集群规则进行工作。</p>
-<p><strong>注：</strong> LVS为四层负载均衡，基于ip和端口进行转发。</p>
-<h2 id="1-2-OSPF-ECMP"><a href="#1-2-OSPF-ECMP" class="headerlink" title="1.2 OSPF/ECMP"></a>1.2 OSPF/ECMP</h2><p>OSPF，开放式最短路径优先协议，一种基于链路状态的内部网关协议。每个OSPF路由器都包含了整个网络的拓扑。并计算通过网络的最短路径。OSPF会通过多播的方式自动对外传播检测到的网络变化。</p>
-<p>RIP，即路由信息协议，是一个老的协议。RIP路由器向网络中周期性多播它的整个路由表，而不像ospf只多播网络的变化。RIP通过跳数来测量路由，任何超过15跳的路由，都被视为不可达。</p>
-<p>ECMP：等价多路径协议。即当存在多条不同的链路到达同一目的地址时，利用ECMP可以同时使用多条链路，不仅增加了传输带宽，还可以无时延、无丢包的备份失效链路的数据传输。如果利用传统的路由算法，只能利用其中的一条链路进行数据的传输。</p>
-<h2 id="1-3-quagga"><a href="#1-3-quagga" class="headerlink" title="1.3 quagga"></a>1.3 quagga</h2><p>quagga是一个实现ospf的路由软件，用于模拟ospf协议。</p>
-<h1 id="2-双活负载均衡架构"><a href="#2-双活负载均衡架构" class="headerlink" title="2. 双活负载均衡架构"></a>2. 双活负载均衡架构</h1><h2 id="2-1-方案一、利用DNS轮训"><a href="#2-1-方案一、利用DNS轮训" class="headerlink" title="2.1 方案一、利用DNS轮训"></a>2.1 方案一、利用DNS轮训</h2><p>配置两套主备模式的负载均衡器，分别配置VIP A和VIP B。在DNS server测针对同一域名，同时注册VIP A和VIP B。然后在请求域名的时候，dns通过轮训返回VIP A或者 VIP B。在服务端，需要通过memcached集群来共享不同节点的内存数据。从而保证session的持久性</p>
-<p><img src="/img/loadbalancer/ecmp-1.png"></p>
-<h2 id="2-2-方案二、利用ECMP"><a href="#2-2-方案二、利用ECMP" class="headerlink" title="2.2 方案二、利用ECMP"></a>2.2 方案二、利用ECMP</h2><p>在此方案中，不存在主备模式的负载均衡器，所有负载均衡器均为主模式，配置同一VIP。在router测，利用quagga模拟ospf，可以看到到达VIP的链路有两条，当请求到达router的时候，会将流量分配到两台主负载均衡器上。</p>
-<p><img src="/img/loadbalancer/ecmp-2.png"></p>
-<h1 id="3-环境准备"><a href="#3-环境准备" class="headerlink" title="3. 环境准备"></a>3. 环境准备</h1><p>本文利用fusion创建了6台虚拟机。基于centos 7.5，具体信息如下：</p>
-<ul>
-<li>VIP: 10.0.1.100</li>
-<li>client: 10.0.1.132</li>
-<li>router: 10.0.1.136</li>
-<li>lb1: 10.0.1.133</li>
-<li>lb2: 10.0.1.135</li>
-<li>real_server1: 10.0.1.129</li>
-<li>real_server2: 10.0.1.131</li>
-</ul>
-<p><strong>注:</strong> 所有虚拟机关闭防火墙</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop firewalld</span><br><span class="line">systemctl <span class="built_in">disable</span> firewalld</span><br></pre></td></tr></table></figure>
-<h1 id="4-环境部署"><a href="#4-环境部署" class="headerlink" title="4. 环境部署"></a>4. 环境部署</h1><h2 id="4-1-real-server端"><a href="#4-1-real-server端" class="headerlink" title="4.1 real server端"></a>4.1 real server端</h2><ol>
-<li>安装nginx提供http服务。</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">yum install nginx -y</span><br><span class="line">systemctl start nginx</span><br><span class="line">systemctl enable nginx</span><br><span class="line">对于real_server1: echo &quot;RealServer1 10.0.1.129&quot; &gt; &#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html&#x2F;index.html</span><br><span class="line">对于real_server2: echo &quot;RealServer2 10.0.1.131&quot; &gt; &#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html&#x2F;index.html</span><br><span class="line">systemctl restart nginx</span><br></pre></td></tr></table></figure>
-<ol start="2">
-<li>配置vip</li>
-</ol>
-<p>由于接收数据包的目的IP是VIP，所以需要将vip绑定到lo网卡，因为lo:vip不是用来通信的，所以这里的一定设置/32位子网掩码。对应修改脚本中的”VIP”变量。</p>
-<p>由于real_server1, real_sever2, lb1, lb2均绑定vip到lo，所以需要关闭real_server1和real_server2的arp响应。对于linux内核参数arp_ignore和arp_announce的配置，参考文档 <a target="_blank" rel="noopener" href="https://www.cnblogs.com/lipengxiang2009/p/7451050.html">https://www.cnblogs.com/lipengxiang2009/p/7451050.html</a></p>
-<p>arp_ignore设置为1：只响应目的IP地址为接收网卡上的本地地址的arp请求。所以对于lo网卡绑定VIP（lo是不接收外部数据包的），所以不会做出响应<br>arp_announce设置为2：忽略IP数据包的源IP地址，选择该发送网卡上最合适的本地地址作为arp请求的源IP地址。arp_announce的作用是控制系统在对外发送arp请求的数据包时，如何选择发送的源ip地址。因为对于任一主机，当接收到arp请求时，如果该arp的目的ip不是自己的ip，主机会把对端的ip和mac地址的对应关系存储到本地的mac地址表中。所以，如果real_server1发送arp的ip是lo的VIP，那么其他主机就会将VIP和mac的对应关系存储到mac地址表中，当下次像vip发送请求的时候，会直接到达real_server1，而不会经过lb。所以要设置arp_announce为2，这样就避免了通过lo:vip发送arp请求包。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># cat relserver.sh</span></span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># Script to start LVS DR real server.</span></span><br><span class="line"><span class="comment"># description: LVS DR real server</span></span><br><span class="line">. /etc/rc.d/init.d/<span class="built_in">functions</span></span><br><span class="line"></span><br><span class="line">VIP=10.0.1.100 <span class="comment">#修改为VIP</span></span><br><span class="line">host=`/bin/hostname`</span><br><span class="line"><span class="keyword">case</span> <span class="string">&quot;<span class="variable">$1</span>&quot;</span> <span class="keyword">in</span></span><br><span class="line">    start)</span><br><span class="line">        /sbin/ifconfig lo down</span><br><span class="line">        /sbin/ifconfig lo up</span><br><span class="line">        <span class="built_in">echo</span> 1 &gt; /proc/sys/net/ipv4/conf/lo/arp_ignore</span><br><span class="line">        <span class="built_in">echo</span> 2 &gt; /proc/sys/net/ipv4/conf/lo/arp_announce</span><br><span class="line">        <span class="built_in">echo</span> 1 &gt; /proc/sys/net/ipv4/conf/all/arp_ignore</span><br><span class="line">        <span class="built_in">echo</span> 2 &gt; /proc/sys/net/ipv4/conf/all/arp_announce</span><br><span class="line">        /sbin/ifconfig lo:0 <span class="variable">$VIP</span> broadcast <span class="variable">$VIP</span> netmask 255.255.255.255 up</span><br><span class="line">        /sbin/route add -host <span class="variable">$VIP</span> dev lo:0</span><br><span class="line">        ;;</span><br><span class="line">    stop)</span><br><span class="line">        /sbin/ifconfig lo:0 down</span><br><span class="line">        <span class="built_in">echo</span> 0 &gt; /proc/sys/net/ipv4/conf/lo/arp_ignore</span><br><span class="line">        <span class="built_in">echo</span> 0 &gt; /proc/sys/net/ipv4/conf/lo/arp_announce</span><br><span class="line">        <span class="built_in">echo</span> 0 &gt; /proc/sys/net/ipv4/conf/all/arp_ignore</span><br><span class="line">        <span class="built_in">echo</span> 0 &gt; /proc/sys/net/ipv4/conf/all/arp_announce</span><br><span class="line">        ;;</span><br><span class="line">    status)</span><br><span class="line">        islothere=`/sbin/ifconfig lo:0 | grep <span class="variable">$VIP</span>`</span><br><span class="line">        isrothere=`netstat -rn | grep <span class="string">&quot;lo&quot;</span> | grep <span class="variable">$VIP</span>`</span><br><span class="line">        <span class="keyword">if</span> [ ! <span class="string">&quot;<span class="variable">$islothere</span>&quot;</span> -o ! <span class="string">&quot;isrothere&quot;</span> ];<span class="keyword">then</span></span><br><span class="line">            <span class="comment"># Either the route or the lo:0 device not found.</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">&quot;LVS-DR real server Stopped.&quot;</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="built_in">echo</span> <span class="string">&quot;LVS-DR real server Running.&quot;</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">        ;;</span><br><span class="line">    *)</span><br><span class="line">        <span class="comment"># Invalid entry.</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$0</span>: Usage: <span class="variable">$0</span> &#123;start|status|stop&#125;&quot;</span></span><br><span class="line">        <span class="built_in">exit</span> 1</span><br><span class="line">        ;;</span><br><span class="line">    <span class="keyword">esac</span></span><br><span class="line">    <span class="built_in">exit</span> 0</span><br><span class="line">[root@localhost ~]<span class="comment"># ./realserver.sh start</span></span><br></pre></td></tr></table></figure>
-<h2 id="4-2-lb端"><a href="#4-2-lb端" class="headerlink" title="4.2 lb端"></a>4.2 lb端</h2><p>配置lb1和lb2，lb1和lb2为双主的负载均衡器，基于LVS和keepalived配置。<br>由于我们使用ospf来实现高可用，所以keepalived不需要配置vrrp功能。keepalived只使用期后端服务检测功能。</p>
-<p>在keepalived-LVS集群的抢占模式下，master节点的网卡挂在VIP，此时VIP的设备是唯一的。但是在OSPF-LVS集群下，router根据ospf信息，通过修改报文的目的mac地址，转发到对应的LVS来实现负载均衡。并不根据VIP对应的arp信息，所以对应的每台LVS将VIP挂载在lo上。</p>
-<ol>
-<li>配置keepalived<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">yum install keepalived -y</span><br><span class="line">[root@localhost ~]<span class="comment"># cat /etc/keepalived/keepalived.conf</span></span><br><span class="line">global_defs &#123;</span><br><span class="line">    router_id LVS1 <span class="comment">#路由器标识</span></span><br><span class="line">    script_user root</span><br><span class="line">    enable_script_security</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">virtual_server 10.0.1.100 80 &#123;  <span class="comment">#此处是VIP</span></span><br><span class="line">    delay_loop 5  <span class="comment">#定义健康检查的时间间隔，单位为秒。</span></span><br><span class="line">    lb_algo rr    <span class="comment">#后端的负载均衡算法，rr为round-robin</span></span><br><span class="line">    lb_kind DR    <span class="comment">#lvs的调度类型，DR/TUN/NAT</span></span><br><span class="line">    <span class="comment">#persistence_timeout 60  #保持客户端的请求在&lt;INT&gt;时间段内全部发到同一个真实服务器。适用于动态网页session共享的环境。默认六分钟。</span></span><br><span class="line">    persistence_granularity 255.255.255.255  <span class="comment">#会话保持粒度，配合persistence_timeout使用，通过子网掩码来定义会话保持对一个IP生效还是对一组IP生效。默认值为255.255.255.255，表示单个客户端分配到一个RS上；255.255.255.0表示客户端IP所在的整个网段的请求都会分配给同一台RS</span></span><br><span class="line">    protocol TCP   <span class="comment"># 使用协议，TCP|UDP|SCTP</span></span><br><span class="line">    inhibit_on_failure on <span class="comment">#配置该项，在检测到后端RS节点故障后将weight值改为0，而不是从IPVS中删除</span></span><br><span class="line">    ha_suspend    <span class="comment"># 在LB节点状态从Master切换到Backup时，不启用对RS节点的健康检查</span></span><br><span class="line">    sorry_server 127.0.0.1 80</span><br><span class="line">    real_server 10.0.1.131 80 &#123;</span><br><span class="line">        weight 10</span><br><span class="line">        HTTP_GET &#123;</span><br><span class="line">            url &#123;</span><br><span class="line">                path /</span><br><span class="line">                status_code 200</span><br><span class="line">            &#125;</span><br><span class="line">        connect_port 80</span><br><span class="line">        connect_timeout 2</span><br><span class="line">        retry 1</span><br><span class="line">        delay_before_retry 1</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    real_server 10.0.1.129 80 &#123;</span><br><span class="line">        weight 10</span><br><span class="line">    HTTP_GET &#123;</span><br><span class="line">            url &#123;</span><br><span class="line">                path /</span><br><span class="line">                status_code 200</span><br><span class="line">            &#125;</span><br><span class="line">        connect_port 80</span><br><span class="line">        connect_timeout 2</span><br><span class="line">        retry 1</span><br><span class="line">        delay_before_retry 1</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">[root@localhost ~]<span class="comment"># systemctl reload keepalived</span></span><br><span class="line">[root@localhost ~]<span class="comment"># systemctl enable keepalived</span></span><br><span class="line"></span><br><span class="line">验证结果：</span><br><span class="line">[root@localhost ~]<span class="comment"># ipvsadm -L</span></span><br><span class="line">IP Virtual Server version 1.2.1 (size=4096)</span><br><span class="line">Prot LocalAddress:Port Scheduler Flags</span><br><span class="line">  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn</span><br><span class="line">TCP  localhost.localdomain:http rr</span><br><span class="line">  -&gt; 10.0.1.129:http              Route   10     0          0</span><br><span class="line">  -&gt; 10.0.1.131:http              Route   10     0          0</span><br><span class="line">[root@localhost ~]<span class="comment">#</span></span><br></pre></td></tr></table></figure></li>
-<li>配置vip<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment">#ifconfig lo:0 10.0.1.100 netmask 255.255.255.255 up</span></span><br><span class="line">[root@localhost ~]<span class="comment"># ifconfig</span></span><br><span class="line">ens33: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        inet 10.0.1.133  netmask 255.255.255.0  broadcast 10.0.1.255</span><br><span class="line">        inet6 fe80::af35:1bc3:d630:16c1  prefixlen 64  scopeid 0x20&lt;link&gt;</span><br><span class="line">        ether 00:0c:29:4a:64:33  txqueuelen 1000  (Ethernet)</span><br><span class="line">        RX packets 169865  bytes 20546055 (19.5 MiB)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 131247  bytes 23749082 (22.6 MiB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br><span class="line"></span><br><span class="line">lo: flags=73&lt;UP,LOOPBACK,RUNNING&gt;  mtu 65536</span><br><span class="line">        inet 127.0.0.1  netmask 255.0.0.0</span><br><span class="line">        inet6 ::1  prefixlen 128  scopeid 0x10&lt;host&gt;</span><br><span class="line">        loop  txqueuelen 1000  (Local Loopback)</span><br><span class="line">        RX packets 746  bytes 57280 (55.9 KiB)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 746  bytes 57280 (55.9 KiB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br><span class="line"></span><br><span class="line">lo:0: flags=73&lt;UP,LOOPBACK,RUNNING&gt;  mtu 65536</span><br><span class="line">        inet 10.0.1.100  netmask 255.255.255.255</span><br><span class="line">        loop  txqueuelen 1000  (Local Loopback)</span><br><span class="line"></span><br><span class="line">[root@localhost ~]<span class="comment">#</span></span><br></pre></td></tr></table></figure></li>
-<li>配置quagga<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># yum install quagga -y</span></span><br><span class="line">[root@localhost ~]<span class="comment"># cat /etc/quagga/ospfd.conf</span></span><br><span class="line">hostname 10.0.1.133   <span class="comment">#用主机ip代替即可</span></span><br><span class="line">password <span class="built_in">test</span></span><br><span class="line"><span class="built_in">log</span> file /var/<span class="built_in">log</span>/quagga/ospfd.log</span><br><span class="line"><span class="built_in">log</span> stdout</span><br><span class="line"><span class="built_in">log</span> syslog</span><br><span class="line">service password-encryption</span><br><span class="line">interface ens33        <span class="comment">#主机ip所在的网卡名</span></span><br><span class="line">  ip ospf hello-interval 1</span><br><span class="line">  ip ospf dead-interval 4</span><br><span class="line">  ip ospf priority 0</span><br><span class="line">  ip ospf cost 1</span><br><span class="line">router ospf</span><br><span class="line">  ospf router-id 10.0.1.133  <span class="comment">#用主机ip代替</span></span><br><span class="line">  log-adjacency-changes</span><br><span class="line">  network 10.0.1.0/24 area 0.0.0.0</span><br><span class="line">access-list 1 permit 127.0.0.1</span><br><span class="line">line vty</span><br><span class="line"> access-class 1</span><br><span class="line">[root@localhost ~]<span class="comment"># cat /etc/quagga/zebra.conf</span></span><br><span class="line">hostname 10.0.1.133    <span class="comment"># 主机ip代替</span></span><br><span class="line">password <span class="built_in">test</span></span><br><span class="line"><span class="built_in">enable</span> password <span class="built_in">test</span></span><br><span class="line"><span class="built_in">log</span> file /var/<span class="built_in">log</span>/quagga/zebra.log</span><br><span class="line">service password-encryption</span><br><span class="line">interface ens33</span><br><span class="line">access-list 1 permit 127.0.0.1</span><br><span class="line">ip prefix-list ANY seq 5 permit 0.0.0.0/0 le 32</span><br><span class="line">route-map ANY deny 10</span><br><span class="line">  match ip address prefix-list ANY</span><br><span class="line">ip protocol ospf route-map ANY</span><br><span class="line">line vty</span><br><span class="line">  access-class 1</span><br><span class="line">[root@localhost ~]<span class="comment"># systemctl  start zebra</span></span><br><span class="line">[root@localhost ~]<span class="comment"># systemctl  start ospfd</span></span><br></pre></td></tr></table></figure>
-<h2 id="4-3-router端"><a href="#4-3-router端" class="headerlink" title="4.3 router端"></a>4.3 router端</h2></li>
-</ol>
-<p>quagga配置</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">//开启转发</span><br><span class="line">[root@localhost ~]<span class="comment"># echo 1 &gt;  /proc/sys/net/ipv4/ip_forward</span></span><br><span class="line">//Router作为网关的接口必须开启arp proxy：</span><br><span class="line">[root@localhost ~]<span class="comment"># echo 1 &gt; /proc/sys/net/ipv4/conf/ens33/proxy_arp</span></span><br><span class="line">[root@localhost ~]<span class="comment"># yum install -y quagga</span></span><br><span class="line">[root@localhost ~]<span class="comment"># cat /etc/quagga/ospfd.conf</span></span><br><span class="line">hostname 10.0.1.136    <span class="comment">#主机ip地址</span></span><br><span class="line">password <span class="built_in">test</span></span><br><span class="line"><span class="built_in">log</span> file /var/<span class="built_in">log</span>/quagga/ospfd.log</span><br><span class="line"><span class="built_in">log</span> stdout</span><br><span class="line"><span class="built_in">log</span> syslog</span><br><span class="line">service password-encryption</span><br><span class="line">interface ens33</span><br><span class="line">  ip ospf hello-interval 1</span><br><span class="line">  ip ospf dead-interval 4</span><br><span class="line">  ip ospf priority 1</span><br><span class="line">  ip ospf cost 1</span><br><span class="line">router ospf</span><br><span class="line">  ospf router-id 10.0.1.136</span><br><span class="line">  log-adjacency-changes</span><br><span class="line">  network 10.0.1.0/24 area 0.0.0.0</span><br><span class="line">access-list 1 permit 127.0.0.1</span><br><span class="line">line vty</span><br><span class="line"> access-class 1</span><br><span class="line">[root@localhost ~]<span class="comment"># cat /etc/quagga/zebra.conf</span></span><br><span class="line">hostname 10.0.1.136 <span class="comment"># HOSTNAME改为IP也可以</span></span><br><span class="line">password <span class="built_in">test</span></span><br><span class="line"><span class="built_in">enable</span> password <span class="built_in">test</span></span><br><span class="line"><span class="built_in">log</span> file /var/<span class="built_in">log</span>/quagga/zebra.log</span><br><span class="line"><span class="comment">#log syslog</span></span><br><span class="line">service password-encryption</span><br><span class="line">interface ens33</span><br><span class="line">access-list 1 permit 127.0.0.1</span><br><span class="line">ip prefix-list ANY seq 5 permit 0.0.0.0/0 le 32</span><br><span class="line">route-map ANY permit 10  <span class="comment">#将ospf路由映射到kernel</span></span><br><span class="line">  match ip address prefix-list ANY</span><br><span class="line">ip protocol ospf route-map ANY</span><br><span class="line">line vty</span><br><span class="line">  access-class 1</span><br><span class="line">[root@localhost ~]<span class="comment">#</span></span><br></pre></td></tr></table></figure>
-<p>验证结果：可以看到访router到达vip 10.0.1.100有两条链路，一条是10.0.1.133(lb1)，一条是10.0.1.135（lb2）</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# vtysh</span><br><span class="line"></span><br><span class="line">Hello, this is Quagga (version 0.99.22.4).</span><br><span class="line">Copyright 1996-2005 Kunihiro Ishiguro, et al.</span><br><span class="line"></span><br><span class="line">localhost.localdomain# show ip ospf neighbor</span><br><span class="line"></span><br><span class="line">    Neighbor ID Pri State           Dead Time Address         Interface            RXmtL RqstL DBsmL</span><br><span class="line">10.0.1.133        0 Full&#x2F;DROther       3.274s 10.0.1.133      ens33:10.0.1.136         0     0     0</span><br><span class="line">10.0.1.135        0 Full&#x2F;DROther       3.934s 10.0.1.135      ens33:10.0.1.136         0     0     0</span><br><span class="line">localhost.localdomain# show ip route</span><br><span class="line">Codes: K - kernel route, C - connected, S - static, R - RIP,</span><br><span class="line">       O - OSPF, I - IS-IS, B - BGP, A - Babel,</span><br><span class="line">       &gt; - selected route, * - FIB route</span><br><span class="line"></span><br><span class="line">K&gt;* 0.0.0.0&#x2F;0 via 10.0.1.2, ens33</span><br><span class="line">O   10.0.1.0&#x2F;24 [110&#x2F;1] is directly connected, ens33, 00:03:18</span><br><span class="line">C&gt;* 10.0.1.0&#x2F;24 is directly connected, ens33</span><br><span class="line">O&gt;* 10.0.1.100&#x2F;32 [110&#x2F;11] via 10.0.1.133, ens33, 00:03:09</span><br><span class="line">  *                        via 10.0.1.135, ens33, 00:03:09</span><br><span class="line">C&gt;* 127.0.0.0&#x2F;8 is directly connected, lo</span><br><span class="line">localhost.localdomain# exit</span><br><span class="line">[root@localhost ~]# ip route</span><br><span class="line">default via 10.0.1.2 dev ens33 proto dhcp metric 100</span><br><span class="line">10.0.1.0&#x2F;24 dev ens33 proto kernel scope link src 10.0.1.136 metric 100</span><br><span class="line">10.0.1.100 proto zebra metric 11</span><br><span class="line">	nexthop via 10.0.1.133 dev ens33 weight 1</span><br><span class="line">	nexthop via 10.0.1.135 dev ens33 weight 1</span><br><span class="line">[root@localhost ~]#</span><br></pre></td></tr></table></figure>
-<h2 id="4-4-client端"><a href="#4-4-client端" class="headerlink" title="4.4 client端"></a>4.4 client端</h2><p>client端，需要配置路由，针对访问VIP的请求均跳转到router，这样router就可以利用ospf的ECMP，将流量分发到后端的lb1和lb2。</p>
-<h1 id="5-结果验证"><a href="#5-结果验证" class="headerlink" title="5. 结果验证"></a>5. 结果验证</h1><p>为了验证router确实最client端数据做了分流。将后端lb做了改动，lb1来对接real_server1, lb2来对接real_server2。通过返回的信息就可以确定lb是否为真的双活。</p>
-<p>client1</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># ifconfig|grep 10.0</span></span><br><span class="line">        inet 10.0.1.138  netmask 255.255.255.0  broadcast 10.0.1.255</span><br><span class="line">        ether 00:0c:29:c8:e5:37  txqueuelen 1000  (Ethernet)</span><br><span class="line">        loop  txqueuelen 1000  (Local Loopback)</span><br><span class="line">[root@localhost ~]<span class="comment"># ip route</span></span><br><span class="line">default via 10.0.1.2 dev ens33 proto dhcp metric 100</span><br><span class="line">10.0.1.0/24 dev ens33 proto kernel scope link src 10.0.1.138 metric 100</span><br><span class="line">10.0.1.100 via 10.0.1.136 dev ens33</span><br><span class="line">[root@localhost ~]<span class="comment"># traceroute 10.0.1.100</span></span><br><span class="line">traceroute to 10.0.1.100 (10.0.1.100), 30 hops max, 60 byte packets</span><br><span class="line"> 1  10.0.1.136 (10.0.1.136)  0.260 ms  0.146 ms  0.146 ms</span><br><span class="line"> 2  10.0.1.100 (10.0.1.100)  0.293 ms  0.303 ms  0.226 ms</span><br><span class="line">[root@localhost ~]<span class="comment"># curl 10.0.1.100</span></span><br><span class="line">server 10.0.1.129</span><br><span class="line">[root@localhost ~]<span class="comment">#</span></span><br></pre></td></tr></table></figure>
-<p>client2</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># ifconfig|grep 10.0</span></span><br><span class="line">        inet 10.0.1.137  netmask 255.255.255.0  broadcast 10.0.1.255</span><br><span class="line">        ether 00:0c:29:09:ae:d5  txqueuelen 1000  (Ethernet)</span><br><span class="line">        loop  txqueuelen 1000  (Local Loopback)</span><br><span class="line">[root@localhost ~]<span class="comment"># ip route</span></span><br><span class="line">default via 10.0.1.2 dev ens33 proto dhcp metric 100</span><br><span class="line">10.0.1.0/24 dev ens33 proto kernel scope link src 10.0.1.137 metric 100</span><br><span class="line">10.0.1.100 via 10.0.1.136 dev ens33</span><br><span class="line">[root@localhost ~]<span class="comment"># traceroute 10.0.1.100</span></span><br><span class="line">traceroute to 10.0.1.100 (10.0.1.100), 30 hops max, 60 byte packets</span><br><span class="line"> 1  10.0.1.136 (10.0.1.136)  0.278 ms  0.180 ms  0.091 ms</span><br><span class="line"> 2  10.0.1.100 (10.0.1.100)  0.452 ms  0.370 ms  0.266 ms</span><br><span class="line">[root@localhost ~]<span class="comment"># curl 10.0.1.100</span></span><br><span class="line">server 10.0.1.131</span><br><span class="line">[root@localhost ~]<span class="comment">#</span></span><br></pre></td></tr></table></figure>
-<p><code>参考文献</code></p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/lipengxiang2009/p/7451050.html">https://www.cnblogs.com/lipengxiang2009/p/7451050.html</a></li>
-<li><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000020299695">https://segmentfault.com/a/1190000020299695</a></li>
-</ul>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
+        <div class="article-info info-on-right">
+          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">负载均衡</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">test</a>
         		</li>
       		
 		</ul>
 	</div>
 
-      
+          
 
-      
-
-      
-        
-<div class="share-btn share-icons tooltip-left">
-  <div class="tooltip tooltip-east">
-    <span class="tooltip-item">
-      <a href="javascript:;" class="share-sns share-outer">
-        <i class="icon icon-share"></i>
-      </a>
-    </span>
-    <span class="tooltip-content">
-      <div class="share-wrap">
-        <div class="share-icons">
-          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
-            <i class="icon icon-weibo"></i>
-          </a>
-          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
-            <i class="icon icon-weixin"></i>
-          </a>
-          <a class="qq share-sns" href="javascript:;" data-type="qq">
-            <i class="icon icon-qq"></i>
-          </a>
-          <a class="douban share-sns" href="javascript:;" data-type="douban">
-            <i class="icon icon-douban"></i>
-          </a>
-          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
-            <i class="icon icon-qzone"></i>
-          </a>
-          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
-            <i class="icon icon-facebook"></i>
-          </a>
-          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
-            <i class="icon icon-twitter"></i>
-          </a>
-          <a class="google share-sns" href="javascript:;" data-type="google">
-            <i class="icon icon-google"></i>
-          </a>
         </div>
-      </div>
-    </span>
-  </div>
-</div>
-
-<div class="page-modal wx-share js-wx-box">
-    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <p>扫一扫，分享到微信</p>
-    <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=https://lk668.github.io/2020/09/20/2020-09-20-ECMP/" alt="微信分享二维码">
-    </div>
-</div>
-
-<div class="mask js-mask"></div>
-      
-      <div class="clearfix"></div>
-    </div>
+        <div class="clearfix"></div>
+    </header>
   </div>
 </article>
-
-  
-<nav id="article-nav">
-  
-    <a href="/2020/12/21/2020-12-21-ovn-dhcp-for-external-host/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          ovn为外部主机提供dhcp服务
-        
-      </div>
-    </a>
   
   
-    <a href="/2020/09/10/2020-09-10-Neutron-debug/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Neutron网络troubleshooting</div>
-      <i class="icon-circle-right"></i>
-    </a>
-  
-</nav>
-
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-        <div class="toc-container tooltip-left">
-            <i class="icon-font icon-category"></i>
-            <div class="tooltip tooltip-east">
-                <span class="tooltip-item">
-                </span>
-                <span class="tooltip-content">
-                    <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E8%83%8C%E6%99%AF%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">1. 背景介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-LVS"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 LVS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-OSPF-ECMP"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 OSPF&#x2F;ECMP</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-quagga"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 quagga</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%8F%8C%E6%B4%BB%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E6%9E%B6%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">2. 双活负载均衡架构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E6%96%B9%E6%A1%88%E4%B8%80%E3%80%81%E5%88%A9%E7%94%A8DNS%E8%BD%AE%E8%AE%AD"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 方案一、利用DNS轮训</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E6%96%B9%E6%A1%88%E4%BA%8C%E3%80%81%E5%88%A9%E7%94%A8ECMP"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 方案二、利用ECMP</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">3.</span> <span class="toc-text">3. 环境准备</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2"><span class="toc-number">4.</span> <span class="toc-text">4. 环境部署</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-real-server%E7%AB%AF"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 real server端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-lb%E7%AB%AF"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 lb端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-router%E7%AB%AF"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 router端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-4-client%E7%AB%AF"><span class="toc-number">4.4.</span> <span class="toc-text">4.4 client端</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E7%BB%93%E6%9E%9C%E9%AA%8C%E8%AF%81"><span class="toc-number">5.</span> <span class="toc-text">5. 结果验证</span></a></li></ol>
-                    </div>
-                </span>
-            </div>
-        </div>
-        
-    </div>
-</aside>
-
-
-
-  
-  
+    </div></section>
   
 
-  
-  <div id="SOHUCS" sid="2020-09-20-ECMP" ></div> 
-<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
-<script type="text/javascript">
-    window.changyan.api.config({
-        appid: "cyvhnMVTX",
-        conf: "prod_5c45c4e333857ed581cff78d5c199d4f"
-    });
-</script>
-</script>
-  
-
-  
-
+    
+    <nav id="page-nav">
+      <a class="extend prev" rel="prev" href="/archives/page/5/">« Prev</a><a class="page-number" href="/archives/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/4/">4</a><a class="page-number" href="/archives/page/5/">5</a><span class="page-number current">6</span>
+    </nav>
   
 
 
@@ -408,8 +229,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: true,
-		isArchive: false,
+		isPost: false,
+		isArchive: true,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

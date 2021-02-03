@@ -6,18 +6,23 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://lk668.github.io">
-  <title>Archives | LiKai的博客</title>
+  <title>neutron metadata 服务详解 | LiKai的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
-<meta property="og:type" content="website">
-<meta property="og:title" content="LiKai的博客">
-<meta property="og:url" content="https://lk668.github.io/archives/page/5/index.html">
+  <meta name="description" content="本文简单介绍一下neutron中metadata是如何对接nova-metadtata为虚拟机提供metadata服务的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="neutron metadata 服务详解">
+<meta property="og:url" content="https://lk668.github.io/2020/10/12/2020-10-12-neutron-metadata/index.html">
 <meta property="og:site_name" content="LiKai的博客">
-<meta property="og:description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
+<meta property="og:description" content="本文简单介绍一下neutron中metadata是如何对接nova-metadtata为虚拟机提供metadata服务的。">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://lk668.github.io/img/openstack/neutron/metadata-1.png">
+<meta property="article:published_time" content="2020-10-11T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-03T10:37:44.618Z">
 <meta property="article:author" content="Li Kai">
-<meta property="article:tag" content="OpenStack,Kubernetes,Docker,网络,Python,Golang">
+<meta property="article:tag" content="openstack">
+<meta property="article:tag" content="neutron">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lk668.github.io/img/openstack/neutron/metadata-1.png">
   
     <link rel="alternative" href="/atom.xml" title="LiKai的博客" type="application/atom+xml">
   
@@ -149,329 +154,221 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-2020-10-12-neutron-metadata" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      neutron metadata 服务详解
+    </h1>
+  
+
+        
+        <a href="/2020/10/12/2020-10-12-neutron-metadata/" class="archive-article-date">
+  	<time datetime="2020-10-11T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-12</time>
+</a>
+        
+      </header>
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本文简单介绍一下neutron中metadata是如何对接nova-metadtata为虚拟机提供metadata服务的。</p>
+<a id="more"></a>
+
+<h1 id="1-Metadata服务简介"><a href="#1-Metadata服务简介" class="headerlink" title="1. Metadata服务简介"></a>1. Metadata服务简介</h1><p>OpenStack的Metadata服务主要是为虚拟机提供配置信息。在虚拟机启动的时候，会向Metadata服务请求自己的metadata信息，然后执行cloud-init的时候完成个性化配置。</p>
+<h2 id="1-1-工作流程"><a href="#1-1-工作流程" class="headerlink" title="1.1 工作流程"></a>1.1 工作流程</h2><p>整个的工作流程如下图所示。经过neutron-metadata-agent进行转发的原因是，nova-api-metadata服务运行在管理网络，而虚拟机是运行在业务网络，两者可能不能通信。而在neutron-metadata-agent之前又嫁接一层neutron-ns-metadata-proxy的原因是在openstack中，不同的网络可以配置相同的CIDR，nova-api-metadata无法根据虚拟机的ip来判定虚拟机的id，所以需要在neutron-ns-metadata-agent服务添加network-id后者router-id。这样就可以根据instance ip，network-id/router-id来获取到唯一的虚拟机id。<br><img src="/img/openstack/neutron/metadata-1.png"></p>
+<ol>
+<li>虚拟机启动的时候会配置默认路由<br>虚拟机启动的时候，会进行默认路由的配置，配置访问169.254.169.254的路由信息</li>
+<li>虚拟机请求169.254.169.254<br>请求到达<code>qrouter-&lt;network-id&gt;</code>或者<code>qdhcp-&lt;network-id&gt;</code>的网络命名空间。如果该网络没有配置router，是到达<code>qdhcp-&lt;network-id&gt;</code>的网络命名空间，如果配有router，会到达<code>qrouter-&lt;network-id&gt;</code>的网络命名空间。</li>
+<li>请求到达<code>qrouter-&lt;network-id&gt;</code>或者<code>qdhcp-&lt;network-id&gt;</code>网络命名空间<br>请求到达网络命名空间以后，经由neutron-ns-metadata-proxy，添加router-id或者network-id，然后通过socket转发给neutron-metadata-agent。</li>
+<li>请求通过unix socket转发给neutron-metadata-agent服务<br>neutron-metadata-agent通过请求头部的network-id/router-id以及请求的ip地址，获取到instance id，将请求转发给nova-api-metadata。</li>
+<li>neutron-metadata-agent服务将请求转发给nova-api-metadata。<br>nova-api-metadata根据instance id回复metadata response。</li>
+</ol>
+<h1 id="2-基于qrouter-lt-network-id-gt-命名空间的metadata服务实现"><a href="#2-基于qrouter-lt-network-id-gt-命名空间的metadata服务实现" class="headerlink" title="2. 基于qrouter-&lt;network-id&gt;命名空间的metadata服务实现"></a>2. 基于<code>qrouter-&lt;network-id&gt;</code>命名空间的metadata服务实现</h1><p>当openstack中的网络连接router时，neutron-metadata-agent通过<code>qrouter-&lt;network-id&gt;</code>网络命名空间来提供metadata服务。</p>
+<p>此时，登录虚拟机，看一下路由规则。可以看到在请求169.254.169.254时，通过gateway进行转发，而gateway是配置在<code>qrouter-&lt;network-id&gt;</code> 网络命名空间下的</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#虚拟机路由</span></span><br><span class="line">[root@<span class="built_in">test</span> ~]<span class="comment"># ip route</span></span><br><span class="line">default via 10.0.0.1 dev eth0</span><br><span class="line">10.0.0.0/24 dev eth0 proto kernel scope link src 10.0.0.14</span><br><span class="line">169.254.169.254 via 10.0.0.1 dev eth0 proto static</span><br><span class="line"></span><br><span class="line"><span class="comment">#qrouter-网络命名空间信息</span></span><br><span class="line">[root@tstack-con01 ~]<span class="comment"># ip netns exec qrouter-f8156a50-cf9e-430c-a8a6-64a87e41fd01 ip a</span></span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1/128 scope host</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">31: qr-6a921526-09: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1450 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">    link/ether fa:16:3e:6f:53:5d brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 10.1.0.1/24 brd 10.1.0.255 scope global qr-6a921526-09</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::f816:3eff:fe6f:535d/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">32: qr-853fe99d-e7: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1450 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">    link/ether fa:16:3e:5d:07:11 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 10.0.0.1/24 brd 10.0.0.255 scope global qr-853fe99d-e7</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::f816:3eff:fe5d:711/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+<p>那么请求在<code>qrouter-&lt;network-id&gt;</code>的命名空间是如何转发的呢？答案是通过iptables</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@tstack-con01 ~]<span class="comment"># ip netns exec qrouter-f8156a50-cf9e-430c-a8a6-64a87e41fd01 iptables-save|grep 169</span></span><br><span class="line">-A neutron-l3-agent-PREROUTING -d 169.254.169.254/32 -i qr-+ -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 9697</span><br><span class="line">-A neutron-l3-agent-PREROUTING -d 169.254.169.254/32 -i qr-+ -p tcp -m tcp --dport 80 -j MARK --set-xmark 0x1/0xffff</span><br></pre></td></tr></table></figure>
+<p>会把对169.254.169.254，80端口的请求转发到9697端口。而9697端口就运行着neutron-ns-metadata-proxy服务，该服务实际上是一个haproxy进行。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@tstack-con01 ~]# ip netns exec qrouter-f8156a50-cf9e-430c-a8a6-64a87e41fd01 lsof -i:9697</span><br><span class="line">COMMAND     PID    USER   FD   TYPE   DEVICE SIZE&#x2F;OFF NODE NAME</span><br><span class="line">haproxy 1592727 neutron    4u  IPv4 27760235      0t0  TCP *:9697 (LISTEN)</span><br><span class="line">[root@tstack-con01 ~]# ip netns exec qrouter-f8156a50-cf9e-430c-a8a6-64a87e41fd01 ps -aux|grep 1592727</span><br><span class="line">neutron  1592727  0.0  0.0  47940  1196 ?        Ss   Feb01   0:01 haproxy -f &#x2F;var&#x2F;lib&#x2F;neutron&#x2F;ns-metadata-proxy&#x2F;f8156a50-cf9e-430c-a8a6-64a87e41fd01.conf</span><br><span class="line">root     1856176  0.0  0.0 112708   952 pts&#x2F;1    S+   00:34   0:00 grep --color&#x3D;auto 1592727</span><br><span class="line">[root@tstack-con01 ~]#</span><br></pre></td></tr></table></figure>
+<p>查看一下配置文件/var/lib/neutron/ns-metadata-proxy/</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">[root@tstack-con01 ~]<span class="comment"># cat /var/lib/neutron/ns-metadata-proxy/f8156a50-cf9e-430c-a8a6-64a87e41fd01.conf</span></span><br><span class="line"></span><br><span class="line">global</span><br><span class="line">    <span class="built_in">log</span>         /dev/<span class="built_in">log</span> local0 debug</span><br><span class="line">    log-tag     haproxy-metadata-proxy-f8156a50-cf9e-430c-a8a6-64a87e41fd01</span><br><span class="line">    user        neutron</span><br><span class="line">    group       neutron</span><br><span class="line">    maxconn     1024</span><br><span class="line">    pidfile     /var/lib/neutron/external/pids/f8156a50-cf9e-430c-a8a6-64a87e41fd01.pid</span><br><span class="line">    daemon</span><br><span class="line"></span><br><span class="line">defaults</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    mode http</span><br><span class="line">    option httplog</span><br><span class="line">    option dontlognull</span><br><span class="line">    option http-server-close</span><br><span class="line">    option forwardfor</span><br><span class="line">    retries                 3</span><br><span class="line">    timeout http-request    30s</span><br><span class="line">    timeout connect         30s</span><br><span class="line">    timeout client          32s</span><br><span class="line">    timeout server          32s</span><br><span class="line">    timeout http-keep-alive 30s</span><br><span class="line"></span><br><span class="line">listen listener</span><br><span class="line">    <span class="built_in">bind</span> 0.0.0.0:9697</span><br><span class="line">    server metadata /var/lib/neutron/metadata_proxy</span><br><span class="line">    http-request add-header X-Neutron-Router-ID f8156a50-cf9e-430c-a8a6-64a87e41fd01</span><br></pre></td></tr></table></figure>
+<p>实际上neutron-ns-metadata-proxy用过socket连接neutron-metadata-agent，然后在请求头部添加router-id，neutorn-metadata-agent就会根据请求的ipd地址和router-id获取到虚拟机的id。然后将请求发送给nova-api-metadata服务。</p>
+<h1 id="3-基于qdhcp-lt-network-id-gt-命名空间的metadata服务实现"><a href="#3-基于qdhcp-lt-network-id-gt-命名空间的metadata服务实现" class="headerlink" title="3. 基于qdhcp-&lt;network-id&gt;命名空间的metadata服务实现"></a>3. 基于<code>qdhcp-&lt;network-id&gt;</code>命名空间的metadata服务实现</h1><p>如果网络没有绑定router，那么neutron通过<code>qdhcp-&lt;network-id&gt;</code>网络命名空间来处理metadata请求。</p>
+<p>此时的实现方式，会在<code>qdhcp-&lt;network-id&gt;</code>网络命名空间添加一个169.254.169.254的网卡。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@openstack-con01 ~]<span class="comment"># ip netns exec qdhcp-35a559be-9f45-4d4e-849f-6c58b7e8ddd1 ip a</span></span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1/128 scope host</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">10: tap768dfac8-23: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1450 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">    link/ether fa:16:3e:fd:4d:8e brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.16.0.2/24 brd 172.16.0.255 scope global tap768dfac8-23</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet 169.254.169.254/16 brd 169.254.255.255 scope global tap768dfac8-23</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::f816:3eff:fefd:4d8e/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+<p>neutron-ns-metadata-proxy运行在80端口，实际就是一个haproxy服务。这样对169.254.169.254的80端口的访问都会直接到达该服务。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@openstack-con01 ~]<span class="comment"># ip netns exec qdhcp-35a559be-9f45-4d4e-849f-6c58b7e8ddd1 lsof -i:80</span></span><br><span class="line">COMMAND  PID    USER   FD   TYPE DEVICE SIZE/OFF NODE NAME</span><br><span class="line">haproxy 5443 neutron    4u  IPv4  41711      0t0  TCP *:http (LISTEN)</span><br><span class="line">[root@openstack-con01 ~]<span class="comment"># ip netns exec qdhcp-35a559be-9f45-4d4e-849f-6c58b7e8ddd1 ps -aux|grep 5443</span></span><br><span class="line">neutron     5443  0.0  0.0  47936   868 ?        Ss    2020  15:39 haproxy -f /var/lib/neutron/ns-metadata-proxy/35a559be-9f45-4d4e-849f-6c58b7e8ddd1.conf</span><br><span class="line">root     3203881  0.0  0.0 112708   968 pts/0    S+   18:20   0:00 grep --color=auto 5443</span><br></pre></td></tr></table></figure>
+<p>看一下haproxy的配置文件，实际上通过socket连接neutron-metadata-agent，然后在请求的头部添加network id。这样neutron-metadata-agent就可以通过虚拟机的ip和network的id来获取instance id，然后想nova-api-metadata请求对应instance的metadata信息。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">[root@openstack-con01 ~]<span class="comment"># cat /var/lib/neutron/ns-metadata-proxy/35a559be-9f45-4d4e-849f-6c58b7e8ddd1.conf</span></span><br><span class="line"></span><br><span class="line">global</span><br><span class="line">    <span class="built_in">log</span>         /dev/<span class="built_in">log</span> local0 info</span><br><span class="line">    log-tag     haproxy-metadata-proxy-35a559be-9f45-4d4e-849f-6c58b7e8ddd1</span><br><span class="line">    user        neutron</span><br><span class="line">    group       neutron</span><br><span class="line">    maxconn     1024</span><br><span class="line">    pidfile     /var/lib/neutron/external/pids/35a559be-9f45-4d4e-849f-6c58b7e8ddd1.pid</span><br><span class="line">    daemon</span><br><span class="line"></span><br><span class="line">defaults</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    mode http</span><br><span class="line">    option httplog</span><br><span class="line">    option dontlognull</span><br><span class="line">    option http-server-close</span><br><span class="line">    option forwardfor</span><br><span class="line">    retries                 3</span><br><span class="line">    timeout http-request    30s</span><br><span class="line">    timeout connect         30s</span><br><span class="line">    timeout client          32s</span><br><span class="line">    timeout server          32s</span><br><span class="line">    timeout http-keep-alive 30s</span><br><span class="line"></span><br><span class="line">listen listener</span><br><span class="line">    <span class="built_in">bind</span> 0.0.0.0:80</span><br><span class="line">    server metadata /var/lib/neutron/metadata_proxy</span><br><span class="line">    http-request add-header X-Neutron-Network-ID 35a559be-9f45-4d4e-849f-6c58b7e8ddd1</span><br></pre></td></tr></table></figure>
+<h1 id="4-源码分析"><a href="#4-源码分析" class="headerlink" title="4. 源码分析"></a>4. 源码分析</h1><ol>
+<li>neutron-ns-metadata-proxy的配置文件生成代码 <a target="_blank" rel="noopener" href="https://github.com/openstack/neutron/blob/805359d9a2b53db431c698e946ba62fe3b7213af/neutron/agent/metadata/driver.py#L97">view code</a></li>
+<li>neutron-metadata-agent的处理函数 <a target="_blank" rel="noopener" href="https://github.com/openstack/neutron/blob/805359d9a2b53db431c698e946ba62fe3b7213af/neutron/agent/metadata/agent.py#L84">view code</a></li>
+<li>neutron-metadata-agent从请求中获取虚拟机ip，router-id/network-id，然后根据这些信息获取虚拟机的id <a target="_blank" rel="noopener" href="https://github.com/openstack/neutron/blob/805359d9a2b53db431c698e946ba62fe3b7213af/neutron/agent/metadata/agent.py#L156">view code</a></li>
+<li>neutron-metadata-agent把请求转发给nova-api-metadata <a target="_blank" rel="noopener" href="https://github.com/openstack/neutron/blob/805359d9a2b53db431c698e946ba62fe3b7213af/neutron/agent/metadata/agent.py#L90">view code</a></li>
+</ol>
+<p><code>参考文档</code></p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://engineering.linecorp.com/en/blog/openstack-summit-vancouver-2018-recap-2-2/">https://engineering.linecorp.com/en/blog/openstack-summit-vancouver-2018-recap-2-2/</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.openstack.org/networking-ovn/latest/contributor/design/metadata_api.html#neutron-and-metadata-today">https://docs.openstack.org/networking-ovn/latest/contributor/design/metadata_api.html#neutron-and-metadata-today</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.99cloud.net/10213.html%EF%BC%8F">https://www.99cloud.net/10213.html%EF%BC%8F</a></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2016" class="archive-year">2016</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/07/18/2016-07-18-3-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/" class="archive-article-date">
-  	<time datetime="2016-07-17T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-18</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/18/2016-07-18-3-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/">3.计算机网络-数据链路层</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">openstack</a>
         		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/07/15/2016-07-15-2-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%89%A9%E7%90%86%E5%B1%82/" class="archive-article-date">
-  	<time datetime="2016-07-14T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/15/2016-07-15-2-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%89%A9%E7%90%86%E5%B1%82/">2.计算机网络-物理层</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
+      		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">neutron</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://lk668.github.io/2020/10/12/2020-10-12-neutron-metadata/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/07/10/2016-07-10-1-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A6%82%E8%BF%B0/" class="archive-article-date">
-  	<time datetime="2016-07-09T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-10</time>
-</a>
+<nav id="article-nav">
+  
+    <a href="/2020/12/13/2020-12-13-ECMP/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          基于ECMP的多活负载均衡策略
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/09/21/2020-09-21-ovn-dhcp-for-external-host/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">ovn为外部主机提供dhcp服务</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/07/10/2016-07-10-1-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%A6%82%E8%BF%B0/">1.计算机网络概述</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-Metadata%E6%9C%8D%E5%8A%A1%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">1. Metadata服务简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 工作流程</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%9F%BA%E4%BA%8Eqrouter-lt-network-id-gt-%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%E7%9A%84metadata%E6%9C%8D%E5%8A%A1%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">2. 基于qrouter-&lt;network-id&gt;命名空间的metadata服务实现</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E5%9F%BA%E4%BA%8Eqdhcp-lt-network-id-gt-%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%E7%9A%84metadata%E6%9C%8D%E5%8A%A1%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.</span> <span class="toc-text">3. 基于qdhcp-&lt;network-id&gt;命名空间的metadata服务实现</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90"><span class="toc-number">4.</span> <span class="toc-text">4. 源码分析</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/04/10/2016-04-10-Hash%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0%E4%B9%8BMD5/" class="archive-article-date">
-  	<time datetime="2016-04-09T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-04-10</time>
-</a>
-        </div>
-    	 
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/04/10/2016-04-10-Hash%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0%E4%B9%8BMD5/">Hash算法实现之MD5</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/04/03/2016-04-03-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%93%BE%E8%A1%A8/" class="archive-article-date">
-  	<time datetime="2016-04-02T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-04-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/04/03/2016-04-03-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%93%BE%E8%A1%A8/">数据结构-链表</a>
-    </h1>
+  <div id="SOHUCS" sid="2020-10-12-neutron-metadata" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyvhnMVTX",
+        conf: "prod_524cf31a894acd71141255b9d0bc7d4f"
+    });
+</script>
+</script>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">数据结构</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/04/02/2016-04-02-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%98%9F%E5%88%97/" class="archive-article-date">
-  	<time datetime="2016-04-01T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-04-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/04/02/2016-04-02-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E9%98%9F%E5%88%97/">数据结构-队列</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">数据结构</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/04/01/2016-04-01-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%A0%88/" class="archive-article-date">
-  	<time datetime="2016-03-31T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-04-01</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/04/01/2016-04-01-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-%E6%A0%88/">数据结构-栈</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">数据结构</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/03/28/2016-03-28-shell/" class="archive-article-date">
-  	<time datetime="2016-03-27T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-03-28</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/03/28/2016-03-28-shell/">Shell基础</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">shell</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/page/4/">« Prev</a><a class="page-number" href="/archives/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/3/">3</a><a class="page-number" href="/archives/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/archives/page/6/">6</a><a class="extend next" rel="next" href="/archives/page/6/">Next »</a>
-    </nav>
   
 
 
@@ -495,8 +392,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

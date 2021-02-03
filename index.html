@@ -151,29 +151,29 @@
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-2020-12-21-ovn-dhcp-for-external-host" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-2020-12-13-ECMP" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/12/21/2020-12-21-ovn-dhcp-for-external-host/">ovn为外部主机提供dhcp服务</a>
+      <a class="article-title" href="/2020/12/13/2020-12-13-ECMP/">基于ECMP的多活负载均衡策略</a>
     </h1>
   
 
         
-        <a href="/2020/12/21/2020-12-21-ovn-dhcp-for-external-host/" class="archive-article-date">
-  	<time datetime="2020-12-20T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-12-21</time>
+        <a href="/2020/12/13/2020-12-13-ECMP/" class="archive-article-date">
+  	<time datetime="2020-12-12T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-12-13</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>本文简单介绍一下OVN是如何通过external logical port来为外部主机提供DHCP服务。</p>
+        <p>本文简单介绍一下，如何基于ECMP，使用Quagga+LVS+Keepalived构建多活负载均衡方案</p>
         
-          <a class="article-more-a" href="/2020/12/21/2020-12-21-ovn-dhcp-for-external-host/#more">more >></a>
+          <a class="article-more-a" href="/2020/12/13/2020-12-13-ECMP/#more">more >></a>
         
       
 
@@ -187,7 +187,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ovn</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">负载均衡</a>
         		</li>
       		
 		</ul>
@@ -197,7 +197,7 @@
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2020/12/21/2020-12-21-ovn-dhcp-for-external-host/">展开全文 >></a>
+          <a class="article-more-a" href="/2020/12/13/2020-12-13-ECMP/">展开全文 >></a>
         </p>
       
 
@@ -227,29 +227,29 @@
 
 
   
-    <article id="post-2020-09-20-ECMP" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-2020-10-12-neutron-metadata" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/09/20/2020-09-20-ECMP/">基于ECMP的多活负载均衡策略</a>
+      <a class="article-title" href="/2020/10/12/2020-10-12-neutron-metadata/">neutron metadata 服务详解</a>
     </h1>
   
 
         
-        <a href="/2020/09/20/2020-09-20-ECMP/" class="archive-article-date">
-  	<time datetime="2020-09-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-20</time>
+        <a href="/2020/10/12/2020-10-12-neutron-metadata/" class="archive-article-date">
+  	<time datetime="2020-10-11T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-12</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>本文简单介绍一下，如何基于ECMP，使用Quagga+LVS+Keepalived构建多活负载均衡方案</p>
+        <p>本文简单介绍一下neutron中metadata是如何对接nova-metadtata为虚拟机提供metadata服务的。</p>
         
-          <a class="article-more-a" href="/2020/09/20/2020-09-20-ECMP/#more">more >></a>
+          <a class="article-more-a" href="/2020/10/12/2020-10-12-neutron-metadata/#more">more >></a>
         
       
 
@@ -263,7 +263,11 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">负载均衡</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">openstack</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">neutron</a>
         		</li>
       		
 		</ul>
@@ -273,7 +277,83 @@
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2020/09/20/2020-09-20-ECMP/">展开全文 >></a>
+          <a class="article-more-a" href="/2020/10/12/2020-10-12-neutron-metadata/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-2020-09-21-ovn-dhcp-for-external-host" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/09/21/2020-09-21-ovn-dhcp-for-external-host/">ovn为外部主机提供dhcp服务</a>
+    </h1>
+  
+
+        
+        <a href="/2020/09/21/2020-09-21-ovn-dhcp-for-external-host/" class="archive-article-date">
+  	<time datetime="2020-09-20T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-21</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本文简单介绍一下OVN是如何通过external logical port来为外部主机提供DHCP服务。</p>
+        
+          <a class="article-more-a" href="/2020/09/21/2020-09-21-ovn-dhcp-for-external-host/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ovn</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/09/21/2020-09-21-ovn-dhcp-for-external-host/">展开全文 >></a>
         </p>
       
 
@@ -687,89 +767,9 @@
 
 
   
-    <article id="post-2019-03-04-OpenStack-Designate" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/03/04/2019-03-04-OpenStack-Designate/">OpenStack Designate简介</a>
-    </h1>
-  
-
-        
-        <a href="/2019/03/04/2019-03-04-OpenStack-Designate/" class="archive-article-date">
-  	<time datetime="2019-03-03T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-03-04</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文主要简单介绍下Designate的部署过程,Designate与后端dns server的同步过程以及涉及到的DNS相关内容</p>
-        
-          <a class="article-more-a" href="/2019/03/04/2019-03-04-OpenStack-Designate/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">openstack</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">designate</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/03/04/2019-03-04-OpenStack-Designate/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
     </nav>
   
 

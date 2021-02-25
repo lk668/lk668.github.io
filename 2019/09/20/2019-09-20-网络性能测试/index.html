@@ -6,17 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://lk668.github.io">
-  <title>LiKai的博客</title>
+  <title>网络性能测试 | LiKai的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
-<meta property="og:type" content="website">
-<meta property="og:title" content="LiKai的博客">
-<meta property="og:url" content="https://lk668.github.io/page/4/index.html">
+  <meta name="description" content="本文简单介绍一下网络性能的相关测试，包括吞吐量，抖动，丢包率，pps，qps，本文主要使用iperf3、netperf、wrk作为测试工具">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网络性能测试">
+<meta property="og:url" content="https://lk668.github.io/2019/09/20/2019-09-20-%E7%BD%91%E7%BB%9C%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/index.html">
 <meta property="og:site_name" content="LiKai的博客">
-<meta property="og:description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
+<meta property="og:description" content="本文简单介绍一下网络性能的相关测试，包括吞吐量，抖动，丢包率，pps，qps，本文主要使用iperf3、netperf、wrk作为测试工具">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-09-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-25T07:48:43.010Z">
 <meta property="article:author" content="Li Kai">
-<meta property="article:tag" content="OpenStack,Kubernetes,Docker,网络,Python,Golang">
+<meta property="article:tag" content="计算机网络">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="LiKai的博客" type="application/atom+xml">
@@ -149,272 +151,88 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-    <article id="post-2017-04-12-SQL基础教程-三" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+            <article id="post-2019-09-20-网络性能测试" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/04/12/2017-04-12-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%89/">SQL基础教程(三)</a>
+    <h1 class="article-title" itemprop="name">
+      网络性能测试
     </h1>
   
 
         
-        <a href="/2017/04/12/2017-04-12-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%89/" class="archive-article-date">
-  	<time datetime="2017-04-11T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-04-12</time>
+        <a href="/2019/09/20/2019-09-20-%E7%BD%91%E7%BB%9C%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/" class="archive-article-date">
+  	<time datetime="2019-09-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-09-20</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>本文简单介绍一下SQL的索引、ALTER、INCREMENT、NULLS、isnull()</p>
-        
-          <a class="article-more-a" href="/2017/04/12/2017-04-12-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%89/#more">more >></a>
-        
-      
+        <p>本文简单介绍一下网络性能的相关测试，包括吞吐量，抖动，丢包率，pps，qps，本文主要使用iperf3、netperf、wrk作为测试工具</p>
+<a id="more"></a>
 
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">数据库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">sql</a>
-        		</li>
-      		
-		</ul>
-	</div>
+<h1 id="1-工具安装"><a href="#1-工具安装" class="headerlink" title="1. 工具安装"></a>1. 工具安装</h1><h2 id="1-1-iperf3"><a href="#1-1-iperf3" class="headerlink" title="1.1 iperf3"></a>1.1 iperf3</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install iperf3</span><br></pre></td></tr></table></figure>
+<h2 id="1-2-netperf"><a href="#1-2-netperf" class="headerlink" title="1.2 netperf"></a>1.2 netperf</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install netperf</span><br></pre></td></tr></table></figure>
+<h2 id="1-3-wrk"><a href="#1-3-wrk" class="headerlink" title="1.3 wrk"></a>1.3 wrk</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y https://github.com/scutse/wrk-rpm/releases/download/4.1.0/wrk-4.1.0-1.el7.centos.x86_64.rpm</span><br></pre></td></tr></table></figure>
+<h2 id="1-4-sar"><a href="#1-4-sar" class="headerlink" title="1.4 sar"></a>1.4 sar</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install sysstat</span><br></pre></td></tr></table></figure>
+<h1 id="2-吞吐量测试"><a href="#2-吞吐量测试" class="headerlink" title="2. 吞吐量测试"></a>2. 吞吐量测试</h1><h2 id="2-1-工具"><a href="#2-1-工具" class="headerlink" title="2.1 工具"></a>2.1 工具</h2><ul>
+<li>iperf3</li>
+</ul>
+<h2 id="2-2-测试举例"><a href="#2-2-测试举例" class="headerlink" title="2.2 测试举例"></a>2.2 测试举例</h2><p>需要两台机器，一台机器充当server，另一台充当client</p>
+<p>server端</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动服务，下面的输出结果，是在client发送数据的时候，输出的</span></span><br><span class="line">[root@tstack-con01 ~]<span class="comment"># iperf3 -s</span></span><br><span class="line">-----------------------------------------------------------</span><br><span class="line">Server listening on 5201</span><br><span class="line">-----------------------------------------------------------</span><br><span class="line">Accepted connection from 192.168.30.134, port 50984</span><br><span class="line">[  5] <span class="built_in">local</span> 192.168.30.133 port 5201 connected to 192.168.30.134 port 50986</span><br><span class="line">[ ID] Interval           Transfer     Bandwidth</span><br><span class="line">[  5]   0.00-1.00   sec  1.14 GBytes  9.80 Gbits/sec</span><br><span class="line">[  5]   1.00-2.00   sec  1.71 GBytes  14.6 Gbits/sec</span><br><span class="line">[  5]   2.00-3.00   sec  1.73 GBytes  14.8 Gbits/sec</span><br><span class="line">[  5]   3.00-4.00   sec  1.87 GBytes  16.1 Gbits/sec</span><br><span class="line">[  5]   4.00-5.00   sec  1.90 GBytes  16.3 Gbits/sec</span><br><span class="line">[  5]   5.00-6.00   sec  2.09 GBytes  17.9 Gbits/sec</span><br><span class="line">[  5]   6.00-7.00   sec  1.66 GBytes  14.2 Gbits/sec</span><br><span class="line">[  5]   7.00-8.00   sec  1.67 GBytes  14.3 Gbits/sec</span><br><span class="line">[  5]   8.00-9.00   sec  1.76 GBytes  15.1 Gbits/sec</span><br><span class="line">[  5]   9.00-10.00  sec  1.75 GBytes  15.1 Gbits/sec</span><br><span class="line">[  5]  10.00-10.04  sec  67.4 MBytes  15.1 Gbits/sec</span><br><span class="line">- - - - - - - - - - - - - - - - - - - - - - - - -</span><br><span class="line">[ ID] Interval           Transfer     Bandwidth</span><br><span class="line">[  5]   0.00-10.04  sec  0.00 Bytes  0.00 bits/sec                  sender</span><br><span class="line">[  5]   0.00-10.04  sec  17.3 GBytes  14.8 Gbits/sec                  receiver</span><br><span class="line">-----------------------------------------------------------</span><br><span class="line">Server listening on 5201</span><br><span class="line">-----------------------------------------------------------</span><br></pre></td></tr></table></figure>
+<p>client端</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 192.168.30.133为server端的ip地址</span></span><br><span class="line">[root@tstack-com01 ~]<span class="comment"># iperf3 -c 192.168.30.133</span></span><br><span class="line">Connecting to host 192.168.30.133, port 5201</span><br><span class="line">[  4] <span class="built_in">local</span> 192.168.30.134 port 50986 connected to 192.168.30.133 port 5201</span><br><span class="line">[ ID] Interval           Transfer     Bandwidth       Retr  Cwnd</span><br><span class="line">[  4]   0.00-1.00   sec  1.21 GBytes  10.4 Gbits/sec    0   1017 KBytes</span><br><span class="line">[  4]   1.00-2.00   sec  1.71 GBytes  14.7 Gbits/sec   29   1.11 MBytes</span><br><span class="line">[  4]   2.00-3.00   sec  1.73 GBytes  14.8 Gbits/sec    0   1.41 MBytes</span><br><span class="line">[  4]   3.00-4.00   sec  1.87 GBytes  16.1 Gbits/sec    3   1.16 MBytes</span><br><span class="line">[  4]   4.00-5.00   sec  1.90 GBytes  16.3 Gbits/sec  119   1.03 MBytes</span><br><span class="line">[  4]   5.00-6.00   sec  2.09 GBytes  17.9 Gbits/sec    0   1.29 MBytes</span><br><span class="line">[  4]   6.00-7.00   sec  1.64 GBytes  14.1 Gbits/sec   19   1.14 MBytes</span><br><span class="line">[  4]   7.00-8.00   sec  1.68 GBytes  14.4 Gbits/sec    0   1.14 MBytes</span><br><span class="line">[  4]   8.00-9.00   sec  1.76 GBytes  15.1 Gbits/sec    0   1.20 MBytes</span><br><span class="line">[  4]   9.00-10.00  sec  1.75 GBytes  15.1 Gbits/sec    0   1.21 MBytes</span><br><span class="line">- - - - - - - - - - - - - - - - - - - - - - - - -</span><br><span class="line">[ ID] Interval           Transfer     Bandwidth       Retr</span><br><span class="line">[  4]   0.00-10.00  sec  17.3 GBytes  14.9 Gbits/sec  170             sender</span><br><span class="line">[  4]   0.00-10.00  sec  17.3 GBytes  14.9 Gbits/sec                  receiver</span><br></pre></td></tr></table></figure>
+<p>从测试结果可以看出，吞吐量为15Gb/s</p>
+<h1 id="3-抖动和丢包率测试"><a href="#3-抖动和丢包率测试" class="headerlink" title="3. 抖动和丢包率测试"></a>3. 抖动和丢包率测试</h1><h2 id="3-1-工具"><a href="#3-1-工具" class="headerlink" title="3.1 工具"></a>3.1 工具</h2><ul>
+<li>iperf3</li>
+</ul>
+<h2 id="3-2-测试举例"><a href="#3-2-测试举例" class="headerlink" title="3.2 测试举例"></a>3.2 测试举例</h2><p>server端</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">[root@tstack-con01 ~]<span class="comment"># iperf3 -s</span></span><br><span class="line">-----------------------------------------------------------</span><br><span class="line">Server listening on 5201</span><br><span class="line">-----------------------------------------------------------</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Accepted connection from 192.168.30.134, port 51048</span><br><span class="line">[  5] <span class="built_in">local</span> 192.168.30.133 port 5201 connected to 192.168.30.134 port 42962</span><br><span class="line">[ ID] Interval           Transfer     Bandwidth       Jitter    Lost/Total Datagrams</span><br><span class="line">[  5]   0.00-1.00   sec   116 KBytes   950 Kbits/sec  3.666 ms  0/82 (0%)</span><br><span class="line">[  5]   1.00-2.00   sec   129 KBytes  1.05 Mbits/sec  0.022 ms  0/91 (0%)</span><br><span class="line">[  5]   2.00-3.00   sec   127 KBytes  1.04 Mbits/sec  0.009 ms  0/90 (0%)</span><br><span class="line">[  5]   3.00-4.00   sec   129 KBytes  1.05 Mbits/sec  0.008 ms  0/91 (0%)</span><br><span class="line">[  5]   4.00-5.00   sec   127 KBytes  1.04 Mbits/sec  0.004 ms  0/90 (0%)</span><br><span class="line">[  5]   5.00-6.00   sec   129 KBytes  1.05 Mbits/sec  0.010 ms  0/91 (0%)</span><br><span class="line">[  5]   6.00-7.00   sec   127 KBytes  1.04 Mbits/sec  0.011 ms  0/90 (0%)</span><br><span class="line">[  5]   7.00-8.00   sec   129 KBytes  1.05 Mbits/sec  0.002 ms  0/91 (0%)</span><br><span class="line">[  5]   8.00-9.00   sec   127 KBytes  1.04 Mbits/sec  0.008 ms  0/90 (0%)</span><br><span class="line">[  5]   9.00-10.00  sec   129 KBytes  1.05 Mbits/sec  0.006 ms  0/91 (0%)</span><br><span class="line">[  5]  10.00-10.04  sec  0.00 Bytes  0.00 bits/sec  0.006 ms  0/0 (0%)</span><br><span class="line">- - - - - - - - - - - - - - - - - - - - - - - - -</span><br><span class="line">[ ID] Interval           Transfer     Bandwidth       Jitter    Lost/Total Datagrams</span><br><span class="line">[  5]   0.00-10.04  sec  0.00 Bytes  0.00 bits/sec  0.006 ms  0/897 (0%)</span><br><span class="line">-----------------------------------------------------------</span><br><span class="line">Server listening on 5201</span><br><span class="line">-----------------------------------------------------------</span><br></pre></td></tr></table></figure>
+<p>client端</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加-u来发送udp数据包，实现抖动和丢包率的测试</span></span><br><span class="line">[root@tstack-com01 ~]<span class="comment"># iperf3 -c 192.168.30.133 -u</span></span><br><span class="line">Connecting to host 192.168.30.133, port 5201</span><br><span class="line">[  4] <span class="built_in">local</span> 192.168.30.134 port 42962 connected to 192.168.30.133 port 5201</span><br><span class="line">[ ID] Interval           Transfer     Bandwidth       Total Datagrams</span><br><span class="line">[  4]   0.00-1.00   sec   116 KBytes   950 Kbits/sec  82</span><br><span class="line">[  4]   1.00-2.00   sec   129 KBytes  1.05 Mbits/sec  91</span><br><span class="line">[  4]   2.00-3.00   sec   127 KBytes  1.04 Mbits/sec  90</span><br><span class="line">[  4]   3.00-4.00   sec   129 KBytes  1.05 Mbits/sec  91</span><br><span class="line">[  4]   4.00-5.00   sec   127 KBytes  1.04 Mbits/sec  90</span><br><span class="line">[  4]   5.00-6.00   sec   129 KBytes  1.05 Mbits/sec  91</span><br><span class="line">[  4]   6.00-7.00   sec   127 KBytes  1.04 Mbits/sec  90</span><br><span class="line">[  4]   7.00-8.00   sec   129 KBytes  1.05 Mbits/sec  91</span><br><span class="line">[  4]   8.00-9.00   sec   127 KBytes  1.04 Mbits/sec  90</span><br><span class="line">[  4]   9.00-10.00  sec   129 KBytes  1.05 Mbits/sec  91</span><br><span class="line">- - - - - - - - - - - - - - - - - - - - - - - - -</span><br><span class="line">[ ID] Interval           Transfer     Bandwidth       Jitter    Lost/Total Datagrams</span><br><span class="line">[  4]   0.00-10.00  sec  1.24 MBytes  1.04 Mbits/sec  0.006 ms  0/897 (0%)</span><br><span class="line">[  4] Sent 897 datagrams</span><br><span class="line"></span><br><span class="line">iperf Done.</span><br></pre></td></tr></table></figure>
+<p>从结果可以看出，抖动为0.006ms, 丢包率为0%</p>
+<h1 id="4-pps测试"><a href="#4-pps测试" class="headerlink" title="4. pps测试"></a>4. pps测试</h1><p>pps全称packets per seconds，也就是每秒钟发送的数据源包数量。</p>
+<h2 id="4-1-工具"><a href="#4-1-工具" class="headerlink" title="4.1 工具"></a>4.1 工具</h2><ul>
+<li>netperf</li>
+<li>sar<h2 id="4-2-测试举例"><a href="#4-2-测试举例" class="headerlink" title="4.2 测试举例"></a>4.2 测试举例</h2>本文使用两台主机实现pps测试。如果条件支持，建议多client进行发包测试。<h3 id="4-2-1-测试TCP-STREAM"><a href="#4-2-1-测试TCP-STREAM" class="headerlink" title="4.2.1 测试TCP_STREAM"></a>4.2.1 测试TCP_STREAM</h3></li>
+</ul>
+<p>在数据接收端运行server服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@tstack-con01 tools]<span class="comment"># netserver -p 12345</span></span><br><span class="line">Starting netserver with host <span class="string">&#x27;IN(6)ADDR_ANY&#x27;</span> port <span class="string">&#x27;12345&#x27;</span> and family AF_UNSPEC</span><br></pre></td></tr></table></figure>
+<p>在client端运行如下命令向server进行数据包的发送</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -H -p 指server端的ip地址和端口号</span></span><br><span class="line"><span class="comment"># -l 30 指发送30s</span></span><br><span class="line"><span class="comment"># -m 1 指发送数据包的大小，测试bps(bit per seconds)的时候，指定为1500</span></span><br><span class="line"><span class="comment"># 默认-t 为TCP_STREAM</span></span><br><span class="line">[root@tstack-com01 ~]<span class="comment"># netperf -H 192.168.30.133 -p 12345 -l 30 -- -m 1</span></span><br><span class="line">MIGRATED TCP STREAM TEST from 0.0.0.0 (0.0.0.0) port 0 AF_INET to 192.168.30.133 () port 0 AF_INET</span><br><span class="line">Recv   Send    Send</span><br><span class="line">Socket Socket  Message  Elapsed</span><br><span class="line">Size   Size    Size     Time     Throughput</span><br><span class="line">bytes  bytes   bytes    secs.    10^6bits/sec</span><br><span class="line"></span><br><span class="line"> 87380  16384     46    30.00     960.44</span><br></pre></td></tr></table></figure>
+<p>在server端通过sar对接收到的数据包进行统计</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1  代表每隔1秒统计一次数据</span></span><br><span class="line"><span class="comment"># 20 代表统计20次取平均值</span></span><br><span class="line">[root@tstack-con01 tools]<span class="comment"># sar -n DEV 1 20|grep enp65s0f0</span></span><br><span class="line">06:06:01 PM enp65s0f0  83469.00   7669.00 120201.31    494.81      0.00      0.00      3.00</span><br><span class="line">06:06:02 PM enp65s0f0  84407.00   7120.00 121833.36    459.07      0.00      0.00      2.00</span><br><span class="line">06:06:03 PM enp65s0f0  83608.00   6786.00 120906.84    450.03      0.00      0.00      3.00</span><br><span class="line">06:06:04 PM enp65s0f0  84361.00   6718.00 122126.39    455.01      0.00      0.00      2.00</span><br><span class="line">06:06:05 PM enp65s0f0  85174.00   6682.00 123558.96    450.80      0.00      0.00      3.00</span><br><span class="line">06:06:06 PM enp65s0f0  83616.00   6661.00 121306.26    429.47      0.00      0.00      2.00</span><br><span class="line">06:06:07 PM enp65s0f0  84546.00   6301.00 122792.27    406.26      0.00      0.00      3.00</span><br><span class="line">06:06:08 PM enp65s0f0  85204.00   5990.00 123920.02    386.70      0.00      0.00      2.00</span><br><span class="line">06:06:09 PM enp65s0f0  85298.00   5852.00 124089.33    377.84      0.00      0.00      3.00</span><br><span class="line">06:06:10 PM enp65s0f0  85127.00   5858.00 123940.40    377.71      0.00      0.00      2.00</span><br><span class="line">06:06:11 PM enp65s0f0  85266.00   5805.00 124079.54    374.78      0.00      0.00      3.00</span><br><span class="line">06:06:12 PM enp65s0f0  84512.00   5738.00 123028.91    369.98      0.00      0.00      2.00</span><br><span class="line">06:06:13 PM enp65s0f0  85252.00   6449.00 123783.21    416.31      0.00      0.00      3.00</span><br><span class="line">06:06:14 PM enp65s0f0  84939.00   6099.00 123585.46    393.24      0.00      0.00      2.00</span><br><span class="line">06:06:15 PM enp65s0f0  85487.00   5805.00 124518.71    374.67      0.00      0.00      3.00</span><br><span class="line">06:06:16 PM enp65s0f0  85531.00   5758.00 124643.46    371.27      0.00      0.00      2.00</span><br><span class="line">06:06:17 PM enp65s0f0  84083.00   6226.00 122316.70    401.93      0.00      0.00      3.00</span><br><span class="line">06:06:18 PM enp65s0f0  84491.00   6072.00 123027.48    391.99      0.00      0.00      2.00</span><br><span class="line">06:06:19 PM enp65s0f0  84907.00   5882.00 123676.07    379.26      0.00      0.00      3.00</span><br><span class="line">06:06:20 PM enp65s0f0  85648.00   5772.00 124816.33    372.18      0.00      0.00      2.00</span><br><span class="line">Average:    enp65s0f0  84746.30   6262.15 123107.55    406.67      0.00      0.00      2.50</span><br><span class="line"></span><br><span class="line"><span class="comment">#从左到右每个数字的意义如下</span></span><br><span class="line">Average:        IFACE   rxpck/s   txpck/s    rxkB/s    txkB/s   rxcmp/s   txcmp/s  rxmcst/s</span><br><span class="line"></span><br><span class="line"><span class="comment">#单位说明：</span></span><br><span class="line">rxpck/s  每秒接受pps</span><br><span class="line">txpck/s  每秒发送pps</span><br><span class="line">rxkB/s   接受带宽</span><br><span class="line">txkB/s   发送带宽</span><br></pre></td></tr></table></figure>
+<p>从结果可以看出，server端收8.4万，发是6k</p>
+<h3 id="4-2-2-测试UDP-STREAM发"><a href="#4-2-2-测试UDP-STREAM发" class="headerlink" title="4.2.2 测试UDP_STREAM发"></a>4.2.2 测试UDP_STREAM发</h3><p>本测试为UDP_STREAM数据包发送性能</p>
+<p>在陪练机运行server服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@tstack-con01 tools]<span class="comment"># netserver -p 12345</span></span><br><span class="line">Starting netserver with host <span class="string">&#x27;IN(6)ADDR_ANY&#x27;</span> port <span class="string">&#x27;12345&#x27;</span> and family AF_UNSPEC</span><br></pre></td></tr></table></figure>
+<p>在测试机运行client服务进行UDP_STREAM发的测试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@tstack-com01 ~]<span class="comment"># netperf -H 192.168.30.133 -p 12345 -l 20 -t UDP_STREAM -- -m 1</span></span><br><span class="line">MIGRATED UDP STREAM TEST from 0.0.0.0 (0.0.0.0) port 0 AF_INET to 192.168.30.133 () port 0 AF_INET</span><br><span class="line">Socket  Message  Elapsed      Messages</span><br><span class="line">Size    Size     Time         Okay Errors   Throughput</span><br><span class="line">bytes   bytes    secs            <span class="comment">#      #   10^6bits/sec</span></span><br><span class="line"></span><br><span class="line">212992       1   20.00     9295295      0       3.72</span><br><span class="line">212992           20.00     7720000              3.09</span><br><span class="line"></span><br><span class="line"><span class="comment"># 参数说明</span></span><br><span class="line">Messages Okay：传输成功的数据包数量</span><br></pre></td></tr></table></figure>
+<p>从结果可以看出，UDP_STREAM发的测试结果是9295295/20=46万</p>
+<h3 id="4-2-3-测试UDP-STREAM收"><a href="#4-2-3-测试UDP-STREAM收" class="headerlink" title="4.2.3 测试UDP_STREAM收"></a>4.2.3 测试UDP_STREAM收</h3><p>测试流程是在陪练机启动client服务，记性数据包的发送，在测试机启动server，用来接收数据包，通过sar来对数据包的接收数量做统计。</p>
+<p>陪练机启动client服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@tstack-com01 ~]<span class="comment"># netperf -H 192.168.30.133 -p 12345 -l 30 -t UDP_STREAM -- -m 1</span></span><br><span class="line">MIGRATED UDP STREAM TEST from 0.0.0.0 (0.0.0.0) port 0 AF_INET to 192.168.30.133 () port 0 AF_INET</span><br><span class="line">Socket  Message  Elapsed      Messages</span><br><span class="line">Size    Size     Time         Okay Errors   Throughput</span><br><span class="line">bytes   bytes    secs            <span class="comment">#      #   10^6bits/sec</span></span><br><span class="line"></span><br><span class="line">212992       1   30.00     14362435      0       3.83</span><br><span class="line">212992           30.00     11855222              3.16</span><br></pre></td></tr></table></figure>
+<p>测试机启动server服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@tstack-con01 tools]<span class="comment"># netserver -p 12345</span></span><br><span class="line">Starting netserver with host <span class="string">&#x27;IN(6)ADDR_ANY&#x27;</span> port <span class="string">&#x27;12345&#x27;</span> and family AF_UNSPEC</span><br></pre></td></tr></table></figure>
+<p>在测试机利用sar来进行数据包的统计工作</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@tstack-con01 ~]<span class="comment"># sar -n DEV 1 20|grep enp65s0f0</span></span><br><span class="line">10:23:06 PM enp65s0f0 394128.00     15.00  23099.12      4.99      0.00      0.00      2.00</span><br><span class="line">10:23:07 PM enp65s0f0 391051.00      4.00  22913.18      0.42      0.00      0.00      3.00</span><br><span class="line">10:23:08 PM enp65s0f0 392257.00      2.00  22983.83      0.28      0.00      0.00      2.00</span><br><span class="line">10:23:09 PM enp65s0f0 395070.00      7.00  23151.33      1.56      0.00      0.00      3.00</span><br><span class="line">10:23:10 PM enp65s0f0 395360.00      1.00  23165.63      0.21      0.00      0.00      2.00</span><br><span class="line">10:23:11 PM enp65s0f0 392057.43      0.99  22972.12      0.21      0.00      0.00      2.97</span><br><span class="line">10:23:12 PM enp65s0f0 396273.00     47.00  23227.00     23.01      0.00      0.00      2.00</span><br><span class="line">10:23:13 PM enp65s0f0 389787.00     82.00  22872.09     27.52      0.00      0.00      3.00</span><br><span class="line">10:23:14 PM enp65s0f0 396265.00      3.00  23219.43      0.81      0.00      0.00      2.00</span><br><span class="line">10:23:15 PM enp65s0f0 395449.00      1.00  23170.85      0.21      0.00      0.00      3.00</span><br><span class="line">10:23:16 PM enp65s0f0 396839.00      1.00  23252.29      0.21      0.00      0.00      2.00</span><br><span class="line">10:23:17 PM enp65s0f0 393822.00      3.00  23077.67      0.84      0.00      0.00      3.00</span><br><span class="line">10:23:18 PM enp65s0f0 396418.00      3.00  23227.65      0.35      0.00      0.00      2.00</span><br><span class="line">10:23:19 PM enp65s0f0 396228.00      7.00  23219.18      1.56      0.00      0.00      3.00</span><br><span class="line">10:23:20 PM enp65s0f0 396245.00      3.00  23217.51      0.35      0.00      0.00      2.00</span><br><span class="line">10:23:21 PM enp65s0f0 395187.00      3.00  23156.88      0.36      0.00      0.00      3.00</span><br><span class="line">10:23:22 PM enp65s0f0 394884.00      2.00  23137.75      0.27      0.00      0.00      2.00</span><br><span class="line">10:23:23 PM enp65s0f0 390526.00     30.00  22895.53     14.09      0.00      0.00      3.00</span><br><span class="line">10:23:24 PM enp65s0f0 391885.00      5.00  22962.81      0.95      0.00      0.00      3.00</span><br><span class="line">10:23:25 PM enp65s0f0 396712.00      1.00  23244.85      0.21      0.00      0.00      3.00</span><br><span class="line">Average:    enp65s0f0 394321.04     11.04  23108.27      3.92      0.00      0.00      2.55</span><br></pre></td></tr></table></figure>
+<p>从上面数据可以开出，UDP_STREAM收的pps是39万</p>
+<h1 id="5-qps测试"><a href="#5-qps测试" class="headerlink" title="5. qps测试"></a>5. qps测试</h1><p>qps全称是queries per seconds，即每秒查询数，也就是每秒服务的处理请求数</p>
+<h2 id="5-1-工具"><a href="#5-1-工具" class="headerlink" title="5.1 工具"></a>5.1 工具</h2><ul>
+<li>wrk</li>
+<li>httpd</li>
+</ul>
+<h2 id="5-2-测试举例"><a href="#5-2-测试举例" class="headerlink" title="5.2 测试举例"></a>5.2 测试举例</h2><p>测试过程是，服务端启动httpd服务，客户端通过wrk来进行压测，测试服务端的qps</p>
+<p>服务器端启动httpd服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@tstack-com01 html]<span class="comment"># yum install -y httpd</span></span><br><span class="line">Loaded plugins: fastestmirror, langpacks</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line">Package httpd-2.4.6-88.el7.centos.x86_64 already installed and latest version</span><br><span class="line">Nothing to <span class="keyword">do</span></span><br><span class="line">[root@tstack-com01 html]<span class="comment"># cat /var/www/html/index.html</span></span><br><span class="line"><span class="built_in">test</span> qps</span><br><span class="line">[root@tstack-com01 html]<span class="comment"># curl http://192.168.30.134/index.html</span></span><br><span class="line"><span class="built_in">test</span> qps</span><br><span class="line">[root@tstack-com01 html]<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<p>client端安装wrk，并通过wrk进行压测</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#参数分析</span></span><br><span class="line"><span class="comment"># -t4 开启4个线程</span></span><br><span class="line"><span class="comment"># -c10000 并发量为10000</span></span><br><span class="line"><span class="comment"># -d10s 测试持续10s</span></span><br><span class="line">[root@tstack-con01 common]<span class="comment"># wrk -t4 -c10000 -d10s http://192.168.30.134/index.html</span></span><br><span class="line">Running 10s <span class="built_in">test</span> @ http://192.168.30.134/index.html</span><br><span class="line">  4 threads and 10000 connections</span><br><span class="line">  Thread Stats   Avg      Stdev     Max   +/- Stdev</span><br><span class="line">    Latency     2.91ms   15.42ms 953.75ms   95.58%</span><br><span class="line">    Req/Sec    31.68k    16.56k   66.90k    69.64%</span><br><span class="line">  176317 requests <span class="keyword">in</span> 10.10s, 41.73MB <span class="built_in">read</span></span><br><span class="line">  Socket errors: connect 8983, <span class="built_in">read</span> 0, write 0, timeout 0</span><br><span class="line">Requests/sec:  17456.94</span><br><span class="line">Transfer/sec:      4.13MB</span><br><span class="line">[root@tstack-con01 common]<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<p>从上面可以看出，在4线程，10000并发的情况下，qps是1.7万。</p>
 
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/04/12/2017-04-12-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%89/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2017-03-25-SQL基础教程-二" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/25/2017-03-25-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%BA%8C/">SQL基础教程(二)</a>
-    </h1>
-  
-
-        
-        <a href="/2017/03/25/2017-03-25-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%BA%8C/" class="archive-article-date">
-  	<time datetime="2017-03-24T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-03-25</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文简单介绍一下SQL数据表的约束规则</p>
-        
-          <a class="article-more-a" href="/2017/03/25/2017-03-25-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%BA%8C/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">数据库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">sql</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/03/25/2017-03-25-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%BA%8C/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2017-03-20-SQL基础教程-一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/20/2017-03-20-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%80/">SQL基础教程(一)</a>
-    </h1>
-  
-
-        
-        <a href="/2017/03/20/2017-03-20-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%80/" class="archive-article-date">
-  	<time datetime="2017-03-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-03-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文简单介绍一下SQL的基本命令使用</p>
-        
-          <a class="article-more-a" href="/2017/03/20/2017-03-20-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%80/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">数据库</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">sql</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/03/20/2017-03-20-SQL%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E4%B8%80/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2016-08-20-9-计算机网络-QOS" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/08/20/2016-08-20-9-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-QOS/">9.计算机网络-QOS</a>
-    </h1>
-  
-
-        
-        <a href="/2016/08/20/2016-08-20-9-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-QOS/" class="archive-article-date">
-  	<time datetime="2016-08-19T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-08-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文主要介绍计算及网络中的QOS服务</p>
-        
-          <a class="article-more-a" href="/2016/08/20/2016-08-20-9-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-QOS/#more">more >></a>
-        
       
 
       
@@ -436,16 +254,84 @@
       
 
       
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2016/08/20/2016-08-20-9-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-QOS/">展开全文 >></a>
-        </p>
-      
 
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://lk668.github.io/2019/09/20/2019-09-20-%E7%BD%91%E7%BB%9C%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
       
       <div class="clearfix"></div>
     </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2020/01/05/2020-01-05-kubernetes-container-security/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Kubernetes容器安全之Apparmor
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/06/09/2019-06-09-%E7%AE%97%E6%B3%95-9-%E8%AE%B0%E5%BF%86%E5%8C%96%E6%90%9C%E7%B4%A2/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">算法（九）记忆化搜索</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -460,321 +346,42 @@
         </div>
         
         
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2016-08-09-8-计算机网络-网络安全下" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/08/09/2016-08-09-8-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8B/">8.计算机网络-网络安全(下)</a>
-    </h1>
-  
-
-        
-        <a href="/2016/08/09/2016-08-09-8-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8B/" class="archive-article-date">
-  	<time datetime="2016-08-08T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-08-09</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文简单介绍一下计算网络的网络安全，主要介绍一下Internet上使用的安全协议，包括SSL,IPSec。</p>
-        
-          <a class="article-more-a" href="/2016/08/09/2016-08-09-8-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8B/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2016/08/09/2016-08-09-8-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8B/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%B7%A5%E5%85%B7%E5%AE%89%E8%A3%85"><span class="toc-number">1.</span> <span class="toc-text">1. 工具安装</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-iperf3"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 iperf3</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-netperf"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 netperf</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-wrk"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 wrk</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-sar"><span class="toc-number">1.4.</span> <span class="toc-text">1.4 sar</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%90%9E%E5%90%90%E9%87%8F%E6%B5%8B%E8%AF%95"><span class="toc-number">2.</span> <span class="toc-text">2. 吞吐量测试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E5%B7%A5%E5%85%B7"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E6%B5%8B%E8%AF%95%E4%B8%BE%E4%BE%8B"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 测试举例</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%8A%96%E5%8A%A8%E5%92%8C%E4%B8%A2%E5%8C%85%E7%8E%87%E6%B5%8B%E8%AF%95"><span class="toc-number">3.</span> <span class="toc-text">3. 抖动和丢包率测试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E5%B7%A5%E5%85%B7"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E6%B5%8B%E8%AF%95%E4%B8%BE%E4%BE%8B"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 测试举例</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-pps%E6%B5%8B%E8%AF%95"><span class="toc-number">4.</span> <span class="toc-text">4. pps测试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E5%B7%A5%E5%85%B7"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E6%B5%8B%E8%AF%95%E4%B8%BE%E4%BE%8B"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 测试举例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-1-%E6%B5%8B%E8%AF%95TCP-STREAM"><span class="toc-number">4.2.1.</span> <span class="toc-text">4.2.1 测试TCP_STREAM</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-2-%E6%B5%8B%E8%AF%95UDP-STREAM%E5%8F%91"><span class="toc-number">4.2.2.</span> <span class="toc-text">4.2.2 测试UDP_STREAM发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-3-%E6%B5%8B%E8%AF%95UDP-STREAM%E6%94%B6"><span class="toc-number">4.2.3.</span> <span class="toc-text">4.2.3 测试UDP_STREAM收</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-qps%E6%B5%8B%E8%AF%95"><span class="toc-number">5.</span> <span class="toc-text">5. qps测试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-%E5%B7%A5%E5%85%B7"><span class="toc-number">5.1.</span> <span class="toc-text">5.1 工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-%E6%B5%8B%E8%AF%95%E4%B8%BE%E4%BE%8B"><span class="toc-number">5.2.</span> <span class="toc-text">5.2 测试举例</span></a></li></ol></li></ol>
+                    </div>
+                </span>
             </div>
         </div>
         
-        
     </div>
 </aside>
 
 
 
-
-  
-    <article id="post-2016-08-02-7-计算机网络-网络安全上" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/08/02/2016-08-02-7-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8A/">7.计算机网络-网络安全(上)</a>
-    </h1>
-  
-
-        
-        <a href="/2016/08/02/2016-08-02-7-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8A/" class="archive-article-date">
-  	<time datetime="2016-08-01T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-08-02</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文简单介绍一下计算网络的网络安全，主要包括病毒木马、加密算法、数字签名、CA证书。</p>
-        
-          <a class="article-more-a" href="/2016/08/02/2016-08-02-7-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8A/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2016/08/02/2016-08-02-7-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E4%B8%8A/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2016-07-28-6-计算机网络-应用层" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/07/28/2016-07-28-6-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E5%BA%94%E7%94%A8%E5%B1%82/">6.计算机网络-应用层</a>
-    </h1>
-  
-
-        
-        <a href="/2016/07/28/2016-07-28-6-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E5%BA%94%E7%94%A8%E5%B1%82/" class="archive-article-date">
-  	<time datetime="2016-07-27T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-28</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文简单介绍一下计算机网络的应用层。主要设计应用层的协议介绍</p>
-        
-          <a class="article-more-a" href="/2016/07/28/2016-07-28-6-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E5%BA%94%E7%94%A8%E5%B1%82/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2016/07/28/2016-07-28-6-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E5%BA%94%E7%94%A8%E5%B1%82/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2016-07-25-5-计算机网络-传输层" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/07/25/2016-07-25-5-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E4%BC%A0%E8%BE%93%E5%B1%82/">5.计算机网络-传输层</a>
-    </h1>
-  
-
-        
-        <a href="/2016/07/25/2016-07-25-5-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E4%BC%A0%E8%BE%93%E5%B1%82/" class="archive-article-date">
-  	<time datetime="2016-07-24T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-25</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文主要简单介绍一下传输层TCP、UDP协议，包括TCP的拥塞控制、拥塞避免，快重传和快恢复</p>
-        
-          <a class="article-more-a" href="/2016/07/25/2016-07-25-5-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E4%BC%A0%E8%BE%93%E5%B1%82/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机网络</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2016/07/25/2016-07-25-5-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C-%E4%BC%A0%E8%BE%93%E5%B1%82/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
   
   
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/3/">« Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/5/">Next »</a>
-    </nav>
+  
+
+  
+  <div id="SOHUCS" sid="2019-09-20-网络性能测试" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyvhnMVTX",
+        conf: "prod_524cf31a894acd71141255b9d0bc7d4f"
+    });
+</script>
+</script>
+  
+
+  
+
   
 
 
@@ -797,8 +404,8 @@
     <script>
 	var yiliaConfig = {
 		mathjax: false,
-		isHome: true,
-		isPost: false,
+		isHome: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,

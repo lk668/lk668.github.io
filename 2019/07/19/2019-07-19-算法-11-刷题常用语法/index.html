@@ -6,17 +6,21 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://lk668.github.io">
-  <title>Archives: 2019/7 | LiKai的博客</title>
+  <title>算法（十一）刷题常用语法python/go | LiKai的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
-<meta property="og:type" content="website">
-<meta property="og:title" content="LiKai的博客">
-<meta property="og:url" content="https://lk668.github.io/archives/2019/07/index.html">
+  <meta name="description" content="本文简单介绍一些在刷题过程中常用的库或者语法，设计python和go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="算法（十一）刷题常用语法python&#x2F;go">
+<meta property="og:url" content="https://lk668.github.io/2019/07/19/2019-07-19-%E7%AE%97%E6%B3%95-11-%E5%88%B7%E9%A2%98%E5%B8%B8%E7%94%A8%E8%AF%AD%E6%B3%95/index.html">
 <meta property="og:site_name" content="LiKai的博客">
-<meta property="og:description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
+<meta property="og:description" content="本文简单介绍一些在刷题过程中常用的库或者语法，设计python和go">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-07-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-11T06:52:36.859Z">
 <meta property="article:author" content="Li Kai">
-<meta property="article:tag" content="OpenStack,Kubernetes,Docker,网络,Python,Golang">
+<meta property="article:tag" content="算法">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="go">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="LiKai的博客" type="application/atom+xml">
@@ -149,36 +153,82 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-2019-07-19-算法-11-刷题常用语法" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      算法（十一）刷题常用语法python/go
+    </h1>
   
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/07/19/2019-07-19-%E7%AE%97%E6%B3%95-11-%E5%88%B7%E9%A2%98%E5%B8%B8%E7%94%A8%E8%AF%AD%E6%B3%95/" class="archive-article-date">
+
+        
+        <a href="/2019/07/19/2019-07-19-%E7%AE%97%E6%B3%95-11-%E5%88%B7%E9%A2%98%E5%B8%B8%E7%94%A8%E8%AF%AD%E6%B3%95/" class="archive-article-date">
   	<time datetime="2019-07-18T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-07-19</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/07/19/2019-07-19-%E7%AE%97%E6%B3%95-11-%E5%88%B7%E9%A2%98%E5%B8%B8%E7%94%A8%E8%AF%AD%E6%B3%95/">算法（十一）刷题常用语法python/go</a>
-    </h1>
-  
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本文简单介绍一些在刷题过程中常用的库或者语法，设计python和go</p>
+<a id="more"></a>
+<h1 id="1-python常用数据结构"><a href="#1-python常用数据结构" class="headerlink" title="1. python常用数据结构"></a>1. python常用数据结构</h1><h2 id="1-1-heapq库"><a href="#1-1-heapq库" class="headerlink" title="1.1 heapq库"></a>1.1 heapq库</h2><p>heapq实现小顶堆。实现涉及堆排序的问题</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> heapq</span><br><span class="line"></span><br><span class="line">heap = []</span><br><span class="line"></span><br><span class="line"><span class="comment"># 构造小顶堆</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> [<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>]:</span><br><span class="line">    heapq.heappush(heap, i)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取堆顶元素,heap[0]永远维护最小元素</span></span><br><span class="line">heap[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除堆顶元素</span></span><br><span class="line">heapq.heappop(a)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 讲一个普通数组转换成一个小顶堆,原地转换，时间复杂度O(len(x))</span></span><br><span class="line">heapq.heapify(x) </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="1-2-collections库"><a href="#1-2-collections库" class="headerlink" title="1.2 collections库"></a>1.2 collections库</h2><p>collections.defaultdict()函数</p>
+<p>举例分析</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">初始化a为<span class="built_in">dict</span>，如过某个key在a中不存在，那么在调用a[key]的时候，返回<span class="number">0</span>。</span><br><span class="line"></span><br><span class="line">如过初始化为collections.defaultdict(<span class="built_in">str</span>)，那么默认返回空字符串<span class="string">&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> collections</span><br><span class="line">a = collections.defaultdict(<span class="built_in">int</span>)</span><br></pre></td></tr></table></figure>
+<p>collections.deque提供一个双端队列</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dq = collections.deque()</span><br><span class="line">dq.append(<span class="number">10</span>)</span><br><span class="line">dq.append(<span class="number">11</span>)</span><br><span class="line">dq.popleft() <span class="comment">#删除左边元素</span></span><br><span class="line">dp.pop() <span class="comment">#删除右边元素</span></span><br></pre></td></tr></table></figure>
+<h2 id="1-3-python无穷大"><a href="#1-3-python无穷大" class="headerlink" title="1.3 python无穷大"></a>1.3 python无穷大</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 正无穷大</span></span><br><span class="line"><span class="built_in">float</span>(<span class="string">&quot;inf&quot;</span>)</span><br><span class="line"><span class="comment"># 负无穷大</span></span><br><span class="line"><span class="built_in">float</span>(<span class="string">&quot;-inf&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="1-4-python-lru-cache"><a href="#1-4-python-lru-cache" class="headerlink" title="1.4 python lru_cache"></a>1.4 python lru_cache</h2><p>python在做bfs或者dfs的时候，利用lru_cache来缓存中间结果，从而降低时间复杂度</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># None是不限制cache大小。@lru_cache(None)的作用是如果调用bfs这个函数，当输入aaa相同时，直接返回结果</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@lru_cache(<span class="params"><span class="literal">None</span></span>)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">bfs</span>(<span class="params">aaa</span>)</span></span><br><span class="line"><span class="function">    # <span class="title">pass</span></span></span><br><span class="line"><span class="function">    <span class="title">return</span> <span class="title">bbb</span></span></span><br></pre></td></tr></table></figure>
+<h1 id="2-Golang常用数据结构"><a href="#2-Golang常用数据结构" class="headerlink" title="2. Golang常用数据结构"></a>2. Golang常用数据结构</h1><h2 id="2-1-Golang循环"><a href="#2-1-Golang循环" class="headerlink" title="2.1 Golang循环"></a>2.1 Golang循环</h2><p>Golang没有while函数，只有for循环</p>
+<ol>
+<li>无限循环<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">    <span class="comment">// pass</span></span><br><span class="line">&#125;</span><br><span class="line">或者</span><br><span class="line"><span class="keyword">for</span> <span class="literal">true</span> &#123;</span><br><span class="line">    <span class="comment">// pass</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>根据某变量循环<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sum := <span class="number">100</span></span><br><span class="line"><span class="keyword">for</span> sum &lt; <span class="number">10</span> &#123;</span><br><span class="line">    <span class="comment">// pass</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>固定循环数量<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for i:&#x3D;0; i &lt;&#x3D; 10 ; i ++ &#123;</span><br><span class="line">    &#x2F;&#x2F; pass</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>字典/数组遍历<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">a_list := []<span class="keyword">int</span>&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;</span><br><span class="line"><span class="keyword">for</span> _, v := <span class="keyword">range</span> a_list&#123;</span><br><span class="line">    <span class="comment">//pass</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">b_dict := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;</span><br><span class="line">    <span class="string">&quot;a&quot;</span>: <span class="string">&quot;a_v&quot;</span>,</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span> k, v := <span class="keyword">range</span> b_dict &#123;</span><br><span class="line">    <span class="comment">//pass</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="2-2-Golang数组操作"><a href="#2-2-Golang数组操作" class="headerlink" title="2.2 Golang数组操作"></a>2.2 Golang数组操作</h2></li>
+</ol>
+<ol>
+<li>初始化数组/切片<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//数组</span></span><br><span class="line"><span class="keyword">var</span> a_list [<span class="number">10</span>] <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//切片</span></span><br><span class="line"><span class="keyword">var</span> b_slice [] <span class="keyword">int</span></span><br><span class="line"><span class="keyword">var</span> b_slice = <span class="built_in">make</span>([]<span class="keyword">int</span>, <span class="number">10</span>)</span><br><span class="line"><span class="keyword">var</span> b_slice = <span class="built_in">make</span>([]<span class="keyword">int</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">//初始化</span></span><br><span class="line">c := []<span class="keyword">int</span>&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//多维数组</span></span><br><span class="line"></span><br><span class="line">d := [][]<span class="keyword">int</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">d := [][]<span class="keyword">int</span>&#123;</span><br><span class="line">    &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;,</span><br><span class="line">    &#123;<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>&#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>切片元素操作(插入，删除，截取，拷贝)<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//插入元素</span></span><br><span class="line">a := []<span class="keyword">int</span>&#123;&#125;</span><br><span class="line"><span class="built_in">append</span>(a, <span class="number">10</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">//删除第2个元素</span></span><br><span class="line">new_arr := <span class="built_in">append</span>(a[:<span class="number">3</span>], a[<span class="number">3</span>:]...)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 截取startIndex到endIndex-1之间的元素</span></span><br><span class="line">arr[startIndex:endIndex]</span><br><span class="line"></span><br><span class="line"><span class="comment">//拷贝,将arr1拷贝给arr2</span></span><br><span class="line"><span class="built_in">copy</span>(arr1, arr2)</span><br></pre></td></tr></table></figure></li>
+<li>获取数组长度<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">len</span>(a_list)</span><br></pre></td></tr></table></figure></li>
+<li>数组作为函数参数<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">test</span><span class="params">(arr []<span class="keyword">int</span>)</span></span>&#123;</span><br><span class="line">    <span class="comment">// pass</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="2-3-Golang-dict操作"><a href="#2-3-Golang-dict操作" class="headerlink" title="2.3 Golang dict操作"></a>2.3 Golang dict操作</h2></li>
+</ol>
+<ol>
+<li>初始化字典<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span></span><br><span class="line"></span><br><span class="line">b := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">c := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;</span><br><span class="line">    <span class="string">&quot;a&quot;</span>:<span class="string">&quot;b&quot;</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>删除字典元素<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">delete</span>(a_map, a_key)</span><br></pre></td></tr></table></figure></li>
+<li>字典作为函数参数<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">test</span><span class="params">(aDict <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">    <span class="comment">//pass</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="2-4-Golang字符串操作"><a href="#2-4-Golang字符串操作" class="headerlink" title="2.4 Golang字符串操作"></a>2.4 Golang字符串操作</h2></li>
+</ol>
+<p>字符串相关操作使用strings包</p>
+<ol>
+<li>获取字符串长度<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&quot;strings&quot;</span></span><br></pre></td></tr></table></figure></li>
+<li>字符串截取<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">从start到end<span class="number">-1</span></span><br><span class="line">s[start:end]</span><br></pre></td></tr></table></figure></li>
+<li>字符串遍历<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">s := <span class="string">&quot;nihao&quot;</span></span><br><span class="line">sChar := []<span class="keyword">byte</span>(s)</span><br><span class="line"><span class="keyword">for</span> i:=<span class="number">0</span>; i &lt; <span class="built_in">len</span>(sChar); i++ &#123;</span><br><span class="line">    fmt.Println(<span class="keyword">string</span>(sChar[i]))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>字符串比较<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">strings.Compare(a, b)</span><br></pre></td></tr></table></figure></li>
+<li>字符串包含<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">strings.Contains(a, sub_a)</span><br></pre></td></tr></table></figure></li>
+<li>字符串分割<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">strings.Split(a, <span class="string">&quot; &quot;</span>)</span><br></pre></td></tr></table></figure></li>
+<li>字符串是否含有前缀后缀<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">strings.HasPrefix(s, s_pre)</span><br><span class="line">strings.HasSuffix(s, s_suf)</span><br></pre></td></tr></table></figure></li>
+<li>字符数组合并<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">strings.Join([]<span class="keyword">string</span>&#123;<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>&#125;)</span><br><span class="line">输出<span class="string">&quot;ab&quot;</span></span><br></pre></td></tr></table></figure></li>
+<li>字符串第一次出现的位置<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">strings.Index(s, sub_s)</span><br></pre></td></tr></table></figure></li>
+<li>字符串替换<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">n是替换的次数，负数表示全部替换</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Replace</span><span class="params">(s, old, <span class="built_in">new</span> <span class="keyword">string</span>, n <span class="keyword">int</span>)</span> <span class="title">string</span></span></span><br><span class="line"></span><br><span class="line">strings.Replace(<span class="string">&quot;nihao&quot;</span>, <span class="string">&quot;ni&quot;</span>, <span class="string">&quot;li&quot;</span>, <span class="number">-1</span>)</span><br></pre></td></tr></table></figure></li>
+<li>字符串大小写转换<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ToLower</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">string</span></span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ToUpper</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">string</span></span></span><br><span class="line"></span><br><span class="line">strings.Tolower(<span class="string">&quot;NIHao&quot;</span>)</span><br><span class="line">strings.ToUpper(<span class="string">&quot;nihao&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="2-5-string与int转换"><a href="#2-5-string与int转换" class="headerlink" title="2.5 string与int转换"></a>2.5 string与int转换</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// package strconv来实现互转</span></span><br><span class="line"><span class="keyword">import</span> strconv</span><br><span class="line"><span class="comment">//string to int</span></span><br><span class="line">i, err := strconv.Atoi(<span class="string">&quot;-42&quot;</span>)</span><br><span class="line">s := strconv.Itoa(<span class="number">12</span>)</span><br></pre></td></tr></table></figure></li>
+</ol>
 
-        <div class="article-info info-on-right">
-          
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -198,65 +248,138 @@
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://lk668.github.io/2019/07/19/2019-07-19-%E7%AE%97%E6%B3%95-11-%E5%88%B7%E9%A2%98%E5%B8%B8%E7%94%A8%E8%AF%AD%E6%B3%95/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/07/11/2019-07-11-%E7%AE%97%E6%B3%95-10-%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/" class="archive-article-date">
-  	<time datetime="2019-07-10T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-07-11</time>
-</a>
+<nav id="article-nav">
+  
+    <a href="/2019/09/20/2019-09-20-%E7%BD%91%E7%BB%9C%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          网络性能测试
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/07/11/2019-07-11-%E7%AE%97%E6%B3%95-10-%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">算法（十）快速排序</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/07/11/2019-07-11-%E7%AE%97%E6%B3%95-10-%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/">算法（十）快速排序</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">go</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-python%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">1. python常用数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-heapq%E5%BA%93"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 heapq库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-collections%E5%BA%93"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 collections库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-python%E6%97%A0%E7%A9%B7%E5%A4%A7"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 python无穷大</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-python-lru-cache"><span class="toc-number">1.4.</span> <span class="toc-text">1.4 python lru_cache</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-Golang%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">2. Golang常用数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-Golang%E5%BE%AA%E7%8E%AF"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 Golang循环</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-Golang%E6%95%B0%E7%BB%84%E6%93%8D%E4%BD%9C"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 Golang数组操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-Golang-dict%E6%93%8D%E4%BD%9C"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 Golang dict操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-Golang%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%93%8D%E4%BD%9C"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 Golang字符串操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-string%E4%B8%8Eint%E8%BD%AC%E6%8D%A2"><span class="toc-number">2.5.</span> <span class="toc-text">2.5 string与int转换</span></a></li></ol></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
   
   
-    </div></section>
   
 
-    
+  
+  <div id="SOHUCS" sid="2019-07-19-算法-11-刷题常用语法" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyvhnMVTX",
+        conf: "prod_524cf31a894acd71141255b9d0bc7d4f"
+    });
+</script>
+</script>
+  
+
+  
+
+  
 
 
           </div>
@@ -279,8 +402,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

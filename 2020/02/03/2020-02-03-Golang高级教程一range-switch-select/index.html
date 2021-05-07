@@ -6,17 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://lk668.github.io">
-  <title>Tag: go | LiKai的博客</title>
+  <title>Golang高级教程(一)for-range, switch, select使用 | LiKai的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
-<meta property="og:type" content="website">
-<meta property="og:title" content="LiKai的博客">
-<meta property="og:url" content="https://lk668.github.io/tags/go/index.html">
+  <meta name="description" content="本文简单介绍一下golang中，for-range，switch，select的使用。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Golang高级教程(一)for-range, switch, select使用">
+<meta property="og:url" content="https://lk668.github.io/2020/02/03/2020-02-03-Golang%E9%AB%98%E7%BA%A7%E6%95%99%E7%A8%8B%E4%B8%80range-switch-select/index.html">
 <meta property="og:site_name" content="LiKai的博客">
-<meta property="og:description" content="奋斗在OpenStack(Python),Kubernetes(Golang)的搬运工">
+<meta property="og:description" content="本文简单介绍一下golang中，for-range，switch，select的使用。">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-02-02T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-05-07T06:46:51.515Z">
 <meta property="article:author" content="Li Kai">
-<meta property="article:tag" content="OpenStack,Kubernetes,Docker,网络,Python,Golang">
+<meta property="article:tag" content="golang">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="LiKai的博客" type="application/atom+xml">
@@ -149,114 +151,219 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-2020-02-03-Golang高级教程一range-switch-select" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/07/19/2019-07-19-%E7%AE%97%E6%B3%95-11-%E5%88%B7%E9%A2%98%E5%B8%B8%E7%94%A8%E8%AF%AD%E6%B3%95/" class="archive-article-date">
-  	<time datetime="2019-07-18T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-07-19</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/07/19/2019-07-19-%E7%AE%97%E6%B3%95-11-%E5%88%B7%E9%A2%98%E5%B8%B8%E7%94%A8%E8%AF%AD%E6%B3%95/">算法（十一）刷题常用语法python/go</a>
+    <h1 class="article-title" itemprop="name">
+      Golang高级教程(一)for-range, switch, select使用
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2020/02/03/2020-02-03-Golang%E9%AB%98%E7%BA%A7%E6%95%99%E7%A8%8B%E4%B8%80range-switch-select/" class="archive-article-date">
+  	<time datetime="2020-02-02T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-02-03</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本文简单介绍一下golang中，for-range，switch，select的使用。</p>
+<a id="more"></a>
+
+<h1 id="1-for-range使用"><a href="#1-for-range使用" class="headerlink" title="1. for-range使用"></a>1. for-range使用</h1><h2 id="1-1-for-range地址的坑"><a href="#1-1-for-range地址的坑" class="headerlink" title="1.1 for-range地址的坑"></a>1.1 for-range地址的坑</h2><p>for-range的坑</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Test <span class="keyword">struct</span> &#123;</span><br><span class="line">	Name <span class="keyword">string</span></span><br><span class="line">	Age  <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	testList := []Test&#123;</span><br><span class="line">		&#123;<span class="string">&quot;test1&quot;</span>, <span class="number">10</span>&#125;,</span><br><span class="line">		&#123;<span class="string">&quot;test2&quot;</span>, <span class="number">11</span>&#125;,</span><br><span class="line">		&#123;<span class="string">&quot;test3&quot;</span>, <span class="number">12</span>&#125;,</span><br><span class="line">		&#123;<span class="string">&quot;test4&quot;</span>, <span class="number">13</span>&#125;,</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> newTestList []*Test</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> _, v := <span class="keyword">range</span> testList &#123;</span><br><span class="line">		newTestList = <span class="built_in">append</span>(newTestList, &amp;v)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> _, v := <span class="keyword">range</span> newTestList &#123;</span><br><span class="line">		fmt.Println(v)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述代码是想将一个数组元素的地址，存到另外一个数组。然而实际的结果输出如下所示，</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ go run main.go</span><br><span class="line">&amp;&#123;test4 13&#125;</span><br><span class="line">&amp;&#123;test4 13&#125;</span><br><span class="line">&amp;&#123;test4 13&#125;</span><br><span class="line">&amp;&#123;test4 13&#125;</span><br></pre></td></tr></table></figure>
+<p>从结果看，与我们预期的不一样，这是什么原因呢？稍等，我稍微改一下代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Test <span class="keyword">struct</span> &#123;</span><br><span class="line">	Name <span class="keyword">string</span></span><br><span class="line">	Age  <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	testList := []Test&#123;</span><br><span class="line">		&#123;<span class="string">&quot;test1&quot;</span>, <span class="number">10</span>&#125;,</span><br><span class="line">		&#123;<span class="string">&quot;test2&quot;</span>, <span class="number">11</span>&#125;,</span><br><span class="line">		&#123;<span class="string">&quot;test3&quot;</span>, <span class="number">12</span>&#125;,</span><br><span class="line">		&#123;<span class="string">&quot;test4&quot;</span>, <span class="number">13</span>&#125;,</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> newTestList []*Test</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> _, v := <span class="keyword">range</span> testList &#123;</span><br><span class="line">        tmpVal := v <span class="comment">//添加这一行code</span></span><br><span class="line">		newTestList = <span class="built_in">append</span>(newTestList, &amp;tmpVal)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> _, v := <span class="keyword">range</span> newTestList &#123;</span><br><span class="line">		fmt.Println(v)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ go run main.go</span><br><span class="line">&amp;&#123;test1 10&#125;</span><br><span class="line">&amp;&#123;test2 11&#125;</span><br><span class="line">&amp;&#123;test3 12&#125;</span><br><span class="line">&amp;&#123;test4 13&#125;</span><br></pre></td></tr></table></figure>
+<p>这次发现结果如预期了。<br>现在来解释一下原因：在for range中，变量v只是被声明了一次，每次迭代的值，都赋值给了v，而该变量的地址始终不变，所以他所保存的是新赋予的数值。而在改进的代码中，我们将v赋予一个新的变量tmpVal，这样通过拷贝数据，每次都能把对应的数值地址记录。</p>
+<p>上面的问题还有一种解决方法，直接引用数据的内存，这个方法比较好，不需要开辟新的内存空间，看代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> k,_ := <span class="keyword">range</span> u&#123;</span><br><span class="line">  n = <span class="built_in">append</span>(n, &amp;u[k])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="1-2-for-range修改变量"><a href="#1-2-for-range修改变量" class="headerlink" title="1.2 for-range修改变量"></a>1.2 for-range修改变量</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Test <span class="keyword">struct</span> &#123;</span><br><span class="line">	Name <span class="keyword">string</span></span><br><span class="line">	Age  <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	testList := []Test&#123;</span><br><span class="line">		&#123;<span class="string">&quot;test1&quot;</span>, <span class="number">10</span>&#125;,</span><br><span class="line">		&#123;<span class="string">&quot;test2&quot;</span>, <span class="number">11</span>&#125;,</span><br><span class="line">		&#123;<span class="string">&quot;test3&quot;</span>, <span class="number">12</span>&#125;,</span><br><span class="line">		&#123;<span class="string">&quot;test4&quot;</span>, <span class="number">13</span>&#125;,</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> _, v := <span class="keyword">range</span> testList &#123;</span><br><span class="line">        v.Age = <span class="number">10</span></span><br><span class="line">	&#125;</span><br><span class="line">    <span class="keyword">for</span> _, v := <span class="keyword">range</span> testList &#123;</span><br><span class="line">        fmt.Println(v)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ <span class="keyword">go</span> run main.<span class="keyword">go</span></span><br><span class="line">&amp;&#123;test1 <span class="number">10</span>&#125;</span><br><span class="line">&amp;&#123;test2 <span class="number">11</span>&#125;</span><br><span class="line">&amp;&#123;test3 <span class="number">12</span>&#125;</span><br><span class="line">&amp;&#123;test4 <span class="number">13</span>&#125;</span><br></pre></td></tr></table></figure>
+<p>你会发现，数值并没有改变，正确的代码如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> k, _ := <span class="keyword">range</span> testList&#123;</span><br><span class="line">    testList[k].age = <span class="number">10</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="1-3-for-range是否会有死循环"><a href="#1-3-for-range是否会有死循环" class="headerlink" title="1.3 for-range是否会有死循环"></a>1.3 for-range是否会有死循环</h2><p>如下代码，在for-range遍历的过程中添加元素，是否会造成死循环呢？</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line"> v := []<span class="keyword">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;</span><br><span class="line"> <span class="keyword">for</span> i := <span class="keyword">range</span> v &#123;</span><br><span class="line">  v = <span class="built_in">append</span>(v, i)</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>答案是不会，range会对切片做拷贝，新增的数据并不在拷贝内容中，并不会发生死循环。</p>
+<h2 id="1-4-for-range-map删除元素"><a href="#1-4-for-range-map删除元素" class="headerlink" title="1.4 for-range map删除元素"></a>1.4 for-range map删除元素</h2><p>在range迭代时，可以删除map中的数据，第一次</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> key := <span class="keyword">range</span> m &#123;</span><br><span class="line">    <span class="keyword">if</span> key.expired() &#123;</span><br><span class="line">        <span class="built_in">delete</span>(m, key)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>官方的解释如下：</p>
+<blockquote>
+<p>The iteration order over maps is not specified and is not guaranteed to be the same from one iteration to the next. If map entries that have not yet been reached are removed during iteration, the corresponding iteration values will not be produced. If map entries are created during iteration, that entry may be produced during the iteration or may be skipped. The choice may vary for each entry created and from one iteration to the next. If the map is nil, the number of iterations is 0.</p>
+</blockquote>
+<blockquote>
+<p><code>map</code>的迭代顺序是不确定的，并且不能保证每次迭代之间都相同。 如果在迭代过程中删除了尚未到达的映射条目，则不会生成相应的迭代值。 如果映射条目是在迭代过程中创建的，则该条目可能在迭代过程中产生或可以被跳过。 对于创建的每个条目以及从一个迭代到下一个迭代，选择可能有所不同。 如果映射为nil，则迭代次数为0</p>
+</blockquote>
+<p>如果在迭代过程中添加了，以为map存储元素是无序的，所以，有可能存储在已经遍历的位置，此时接下来的迭代，不会打印出新数据。如果存储在还没有遍历的位置，那么接下来的迭代，会打印出新数据。</p>
+<h1 id="2-switch的使用"><a href="#2-switch的使用" class="headerlink" title="2. switch的使用"></a>2. switch的使用</h1><p>用法如下，switch是按顺序进行匹配，如果都匹配不上的时候，执行default。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">switch</span> a &#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="number">10</span>:</span><br><span class="line">		fmt.Println(<span class="string">&quot;Input is 10&quot;</span>)</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		fmt.Println(<span class="string">&quot;input is not matched&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="3-select的使用"><a href="#3-select的使用" class="headerlink" title="3. select的使用"></a>3. select的使用</h1><p>select是用在channel中，select如果匹配上多个，随机选择执行一个，举例分析如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> &lt;- channel1:</span><br><span class="line">		fmt.Println(<span class="string">&quot;Receive data from channel1&quot;</span>)</span><br><span class="line">	<span class="keyword">case</span> &lt;- channel2:</span><br><span class="line">		fmt.Println(<span class="string">&quot;Receive data from channel2&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述代码没有default，所以当没有数据发送给channel的时候，就会block在那，如果不想block，需要加default</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> &lt;- channel1:</span><br><span class="line">		fmt.Println(<span class="string">&quot;Receive data from channel1&quot;</span>)</span><br><span class="line">	<span class="keyword">case</span> &lt;- channel2:</span><br><span class="line">		fmt.Println(<span class="string">&quot;Receive data from channel2&quot;</span>)</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		fmt.Println(<span class="string">&quot;Don&#x27;t receive any data&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>参考</code></p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/G7z80u83LTgLyfHgzgrd9g">https://mp.weixin.qq.com/s/G7z80u83LTgLyfHgzgrd9g</a></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">go</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">golang</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://lk668.github.io/2020/02/03/2020-02-03-Golang%E9%AB%98%E7%BA%A7%E6%95%99%E7%A8%8B%E4%B8%80range-switch-select/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/07/11/2019-07-11-%E7%AE%97%E6%B3%95-10-%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/" class="archive-article-date">
-  	<time datetime="2019-07-10T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-07-11</time>
-</a>
+<nav id="article-nav">
+  
+    <a href="/2020/02/05/2020-02-05-Golang%E9%AB%98%E7%BA%A7%E6%95%99%E7%A8%8B%E4%BA%8C%E7%B1%BB%E5%9E%8B%E6%96%AD%E8%A8%80/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Golang高级教程(二)类型断言
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/01/05/2020-01-05-kubernetes-container-security/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Kubernetes容器安全之Apparmor</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/07/11/2019-07-11-%E7%AE%97%E6%B3%95-10-%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/">算法（十）快速排序</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">go</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-for-range%E4%BD%BF%E7%94%A8"><span class="toc-number">1.</span> <span class="toc-text">1. for-range使用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-for-range%E5%9C%B0%E5%9D%80%E7%9A%84%E5%9D%91"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 for-range地址的坑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-for-range%E4%BF%AE%E6%94%B9%E5%8F%98%E9%87%8F"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 for-range修改变量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-for-range%E6%98%AF%E5%90%A6%E4%BC%9A%E6%9C%89%E6%AD%BB%E5%BE%AA%E7%8E%AF"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 for-range是否会有死循环</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-for-range-map%E5%88%A0%E9%99%A4%E5%85%83%E7%B4%A0"><span class="toc-number">1.4.</span> <span class="toc-text">1.4 for-range map删除元素</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-switch%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">2.</span> <span class="toc-text">2. switch的使用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-select%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">3. select的使用</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
   
   
-    </div></section>
   
 
-    
+  
+  <div id="SOHUCS" sid="2020-02-03-Golang高级教程一range-switch-select" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "cyvhnMVTX",
+        conf: "prod_524cf31a894acd71141255b9d0bc7d4f"
+    });
+</script>
+</script>
+  
+
+  
+
+  
 
 
           </div>
@@ -279,9 +386,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
@@ -406,10 +513,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">neutron</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">go</a>
               </li>
              
               <li class="article-tag-list-item">

@@ -16,7 +16,7 @@
 <meta property="og:description" content="本文简单介绍一下golang中断言的使用。">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-02-04T16:00:00.000Z">
-<meta property="article:modified_time" content="2021-05-07T06:46:26.119Z">
+<meta property="article:modified_time" content="2021-05-08T07:41:52.896Z">
 <meta property="article:author" content="Li Kai">
 <meta property="article:tag" content="golang">
 <meta name="twitter:card" content="summary">
@@ -183,20 +183,7 @@
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">t, ok := i.(T)</span><br></pre></td></tr></table></figure>
 <p>如果断言成功，ok为true，t为断言以后的结果，如果断言失败，ok为false，t为T的零值（即如果是string就是””,如果是int就是0，如果是bool就是false）</p>
 <h1 id="2-switch-type断言"><a href="#2-switch-type断言" class="headerlink" title="2. switch type断言"></a>2. switch type断言</h1><p>如果需要区分多种类型，那么需要使用switch type 来进行。</p>
-<pre><code class="go">func findType(i interface&#123;&#125;) &#123;
-    switch x := i.(type) &#123;
-    case int:
-        fmt.Println(x, &quot;is int&quot;)
-    case string:
-        fmt.Println(x, &quot;is string&quot;)
-    case nil:
-        fmt.Println(x, &quot;is nil&quot;)
-    default:
-        fmt.Println(x, &quot;not type matched&quot;)
-    &#125;
-&#125;
-</code></pre>
-
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findType</span><span class="params">(i <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    <span class="keyword">switch</span> x := i.(<span class="keyword">type</span>) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="keyword">int</span>:</span><br><span class="line">        fmt.Println(x, <span class="string">&quot;is int&quot;</span>)</span><br><span class="line">    <span class="keyword">case</span> <span class="keyword">string</span>:</span><br><span class="line">        fmt.Println(x, <span class="string">&quot;is string&quot;</span>)</span><br><span class="line">    <span class="keyword">case</span> <span class="literal">nil</span>:</span><br><span class="line">        fmt.Println(x, <span class="string">&quot;is nil&quot;</span>)</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        fmt.Println(x, <span class="string">&quot;not type matched&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
       
 
       
